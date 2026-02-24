@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AssetVerify — Asset Verification Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- ════════════════════════════════════════════════════════
+     🔥 FIREBASE CONFIG — PASTE YOUR VALUES HERE
+     Get these from: Firebase Console → Project Settings → Your Apps → Config
+════════════════════════════════════════════════════════ -->
+<script>
+  const FIREBASE_CONFIG = {
+    apiKey:            "AIzaSyBqcUr_9hiKa2ybosZsKlnMDMu5zGG7ZmM",
+    authDomain:        "assetverify-6a171.firebaseapp.com",
+    projectId:         "assetverify-6a171",
+    storageBucket:     "assetverify-6a171.firebasestorage.app",
+    messagingSenderId: "901635583380",
+    appId:             "1:901635583380:web:ac03d48bd485fd711cb381"
+  };
+  // Set to false once you've pasted real values above
+  const DEMO_MODE = FIREBASE_CONFIG.apiKey === "AIzaSyBqcUr_9hiKa2ybosZsKlnMDMu5zGG7ZmM";
+</script>
+
+<style>
+:root {
+  --bg:#F5F3EE; --surface:#FFF; --surface2:#EDEBE5; --ink:#1A1714;
+  --ink2:#6B6560; --ink3:#9B958F; --accent:#C84B2F; --accent2:#E8A020;
+  --accent-lt:#FBF0ED; --border:#DDD9D2; --success:#2D6A4F;
+  --success-lt:#E8F5EE; --danger:#C0392B; --danger-lt:#FDEDEC;
+  --shadow:0 2px 12px rgba(26,23,20,.08); --shadow-lg:0 8px 40px rgba(26,23,20,.14);
+  --radius:12px; --radius-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh}
+h1,h2,h3,h4{font-family:'Syne',sans-serif}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── AUTH ── */
+#authScreen{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+.auth-left{background:var(--ink);color:#fff;padding:60px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.auth-left::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(200,75,47,.3) 0%,transparent 70%);top:-100px;left:-100px;pointer-events:none}
+.auth-left::after{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(232,160,32,.2) 0%,transparent 70%);bottom:80px;right:-60px;pointer-events:none}
+.brand{position:relative;z-index:1}
+.brand-logo{display:flex;align-items:center;gap:12px;margin-bottom:60px}
+.brand-icon{width:44px;height:44px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.brand-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:-.03em;color:#fff}
+.brand-tagline{font-size:42px;font-weight:800;line-height:1.1;letter-spacing:-.03em;color:#fff;margin-bottom:20px}
+.brand-tagline span{color:var(--accent2)}
+.brand-desc{font-size:15px;color:rgba(255,255,255,.55);line-height:1.6;max-width:320px}
+.auth-features{position:relative;z-index:1;display:flex;flex-direction:column;gap:14px}
+.auth-feat{display:flex;align-items:center;gap:12px;font-size:13px;color:rgba(255,255,255,.7)}
+.auth-feat-icon{width:32px;height:32px;background:rgba(255,255,255,.08);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.auth-right{background:var(--bg);display:flex;align-items:center;justify-content:center;padding:40px}
+.auth-box{width:100%;max-width:420px}
+.auth-tabs{display:flex;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:32px}
+.auth-tab{flex:1;padding:10px;text-align:center;border-radius:7px;cursor:pointer;font-size:14px;font-weight:600;color:var(--ink2);transition:all .2s;border:none;background:none;font-family:'DM Sans',sans-serif}
+.auth-tab.active{background:var(--surface);color:var(--ink);box-shadow:0 1px 6px rgba(0,0,0,.1)}
+.auth-form-title{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+.auth-form-sub{font-size:13px;color:var(--ink2);margin-bottom:28px}
+.auth-panel{display:none}
+.auth-panel.active{display:block}
+
+/* ── FORM ELEMENTS ── */
+.field{margin-bottom:18px}
+.field label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .18s,box-shadow .18s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,75,47,.1)}
+.field textarea{resize:vertical;min-height:72px}
+.btn{padding:12px 24px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .18s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:var(--accent);color:#fff;width:100%;justify-content:center;font-size:15px;padding:14px}
+.btn-primary:hover{background:#b03f25;transform:translateY(-1px);box-shadow:0 4px 20px rgba(200,75,47,.3)}
+.btn-primary:disabled{background:#ccc;transform:none;box-shadow:none;cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--ink2);border:1.5px solid var(--border)}
+.btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-danger{background:var(--danger-lt);color:var(--danger);border:1px solid #f5c6c2}
+.btn-danger:hover{background:var(--danger);color:#fff}
+.btn-icon{width:34px;height:34px;padding:0;border-radius:8px;justify-content:center}
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--ink3);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.error-msg{background:var(--danger-lt);border:1px solid #f5c6c2;border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--danger);margin-bottom:16px;display:none}
+.error-msg.show{display:block}
+.info-box{background:var(--success-lt);border:1px solid #b7dfc8;border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--success);line-height:1.7;margin-top:16px}
+
+/* ── LOADING OVERLAY ── */
+#loadingOverlay{position:fixed;inset:0;background:rgba(255,255,255,.92);z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--ink2);font-weight:500}
+
+/* ── DEMO BANNER ── */
+#demoBanner{background:var(--accent2);color:var(--ink);padding:10px 20px;text-align:center;font-size:13px;font-weight:600;display:none}
+#demoBanner a{color:var(--ink);text-decoration:underline;cursor:pointer}
+
+/* ── MAIN APP ── */
+#appScreen{display:none;min-height:100vh}
+.navbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:var(--shadow)}
+.nav-brand{display:flex;align-items:center;gap:10px}
+.nav-brand-icon{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;letter-spacing:-.02em}
+.nav-company-pill{display:flex;align-items:center;gap:8px;background:var(--accent-lt);border:1px solid #f0c8be;border-radius:20px;padding:4px 14px;font-size:12px;font-weight:600;color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;background:var(--accent)}
+.app-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 60px)}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:20px 12px;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto}
+.sidebar-section{margin-bottom:24px}
+.sidebar-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);padding:0 12px;margin-bottom:6px}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--ink2);cursor:pointer;transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif}
+.sidebar-item:hover{background:var(--surface2);color:var(--ink)}
+.sidebar-item.active{background:var(--accent-lt);color:var(--accent);font-weight:600}
+.sidebar-item .s-icon{font-size:16px;width:20px;text-align:center}
+.sidebar-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.main{padding:32px;overflow-y:auto}
+.page{display:none}
+.page.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px}
+.page-title{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.page-sub{font-size:13px;color:var(--ink2);margin-top:3px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent)}
+.stat-card.green::before{background:var(--success)}
+.stat-card.amber::before{background:var(--accent2)}
+.stat-card.blue::before{background:#2980b9}
+.stat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);margin-bottom:8px}
+.stat-value{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+.stat-icon{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:32px;opacity:.12}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.card-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-head h3{font-size:15px;font-weight:700}
+.card-body{padding:22px}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.form-grid .field.span2{grid-column:span 2}
+.form-grid .field.span3{grid-column:span 3}
+.form-actions{display:flex;gap:10px;margin-top:6px}
+.form-actions .btn-primary{width:auto;flex:1}
+.table-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
+.table-toolbar .field{margin-bottom:0;min-width:160px}
+.table-toolbar .field input,.table-toolbar .field select{padding:9px 12px;font-size:13px}
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--bg)}
+th{padding:11px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer}
+th:hover{color:var(--accent)}
+td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg)}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.empty-state{text-align:center;padding:60px 24px}
+.empty-icon{font-size:52px;margin-bottom:12px;opacity:.4}
+.empty-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.empty-desc{font-size:13px;color:var(--ink2)}
+.toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:9999}
+.toast{background:var(--ink);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);transform:translateX(120%);transition:transform .3s cubic-bezier(.175,.885,.32,1.275);max-width:320px}
+.toast.show{transform:translateX(0)}
+.toast.success{background:var(--success)}
+.toast.error{background:var(--danger)}
+.toast.warning{background:var(--accent2);color:var(--ink)}
+.modal-overlay{position:fixed;inset:0;background:rgba(26,23,20,.5);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:16px;padding:28px;width:100%;max-width:580px;box-shadow:var(--shadow-lg);transform:scale(.95);transition:transform .2s;max-height:90vh;overflow-y:auto}
+.modal-overlay.show .modal{transform:scale(1)}
+.modal-title{font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.summary-row:last-child{border-bottom:none}
+.summary-val{font-family:'Syne',sans-serif;font-weight:700;color:var(--accent)}
+.company-select-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:40px}
+.company-select-box{max-width:520px;width:100%}
+.company-cards{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+.company-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:18px 20px;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:16px}
+.company-card:hover{border-color:var(--accent);box-shadow:0 4px 20px rgba(200,75,47,.1);transform:translateY(-1px)}
+.company-avatar{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:#fff;flex-shrink:0}
+.company-info h4{font-size:15px;font-weight:700;margin-bottom:3px}
+.company-info p{font-size:12px;color:var(--ink2)}
+.company-arrow{margin-left:auto;color:var(--ink3);font-size:18px}
+.cond-Good{background:#e8f5ee;color:#2d6a4f}
+.cond-Fair{background:#fff8e1;color:#f57f17}
+.cond-Poor{background:#fff3e0;color:#e65100}
+.cond-Damaged{background:#fdedec;color:#c0392b}
+.cond-Missing{background:#f3e5f5;color:#6a1b9a}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#ccc;display:inline-block;margin-left:4px}
+.sync-dot.synced{background:var(--success)}
+.sync-dot.syncing{background:var(--accent2);animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@media(max-width:900px){
+  #authScreen{grid-template-columns:1fr}
+  .auth-left{display:none}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .app-layout{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .form-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .stats-row{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .form-grid .field.span2,.form-grid .field.span3{grid-column:span 1}
+  .summary-grid{grid-template-columns:1fr}
+  .main{padding:16px}
+  .navbar{padding:0 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- DEMO MODE BANNER -->
+<div id="demoBanner">
+  ⚠️ Running in DEMO MODE — data stored locally only. <a onclick="scrollToConfig()">Click here to connect Firebase</a> for live cloud sync.
+</div>
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Connecting to AssetVerify...</div>
+</div>
+
+<!-- ══ AUTH SCREEN ══ -->
+<div id="authScreen" style="display:none">
+  <div class="auth-left">
+    <div class="brand">
+      <div class="brand-logo">
+        <div class="brand-icon">📋</div>
+        <div class="brand-name">AssetVerify</div>
+      </div>
+      <div class="brand-tagline">Physical Asset<br><span>Verification</span><br>Platform</div>
+      <div class="brand-desc">Built for Acefone Software, Servetel Communications &amp; Servetel Infocomm — one platform for all your legal entities.</div>
+    </div>
+    <div class="auth-features">
+      <div class="auth-feat"><div class="auth-feat-icon">🔥</div>Live cloud sync — all team members see the same data instantly</div>
+      <div class="auth-feat"><div class="auth-feat-icon">🏢</div>3 companies pre-loaded — separate data per legal entity</div>
+      <div class="auth-feat"><div class="auth-feat-icon">🔐</div>Secure Firebase Auth — industry-standard login</div>
+      <div class="auth-feat"><div class="auth-feat-icon">📊</div>Real-time dashboard, summaries &amp; CSV export</div>
+    </div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-box">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="showAuthPanel('login')">Sign In</button>
+        <button class="auth-tab" onclick="showAuthPanel('register')">Register</button>
+      </div>
+      <!-- LOGIN -->
+      <div class="auth-panel active" id="loginPanel">
+        <h2 class="auth-form-title">Welcome back</h2>
+        <p class="auth-form-sub">Sign in to access your company's assets</p>
+        <div class="error-msg" id="loginError"></div>
+        <div class="field"><label>Email Address</label><input type="email" id="loginEmail" placeholder="you@acefone.com"></div>
+        <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Sign In →</button>
+        <div class="divider">or</div>
+        <p style="text-align:center;font-size:13px;color:var(--ink2)">New user? <a href="#" onclick="showAuthPanel('register')" style="color:var(--accent);font-weight:600">Register here</a></p>
+      </div>
+      <!-- REGISTER -->
+      <div class="auth-panel" id="registerPanel">
+        <h2 class="auth-form-title">Create Account</h2>
+        <p class="auth-form-sub">Register and join your company</p>
+        <div class="error-msg" id="registerError"></div>
+        <div class="field"><label>Full Name</label><input type="text" id="regName" placeholder="Your full name"></div>
+        <div class="field"><label>Email Address</label><input type="email" id="regEmail" placeholder="you@acefone.com"></div>
+        <div class="field"><label>Password (min 6 chars)</label><input type="password" id="regPass" placeholder="Create a password"></div>
+        <div class="field"><label>Confirm Password</label><input type="password" id="regPass2" placeholder="Repeat password"></div>
+        <div class="field">
+          <label>Your Company</label>
+          <select id="regCompany">
+            <option value="">— Select your company —</option>
+            <option value="ace001">Acefone Software Pvt Ltd</option>
+            <option value="srv001">Servetel Communications Pvt Ltd</option>
+            <option value="srv002">Servetel Infocomm Pvt Ltd</option>
+          </select>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--ink2);margin-bottom:16px;line-height:1.6">
+          💡 You can join additional companies later using their company code.
+        </div>
+        <button class="btn btn-primary" id="registerBtn" onclick="doRegister()">Create Account →</button>
+        <p style="margin-top:14px;text-align:center;font-size:13px;color:var(--ink2)">Already registered? <a href="#" onclick="showAuthPanel('login')" style="color:var(--accent);font-weight:600">Sign in</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COMPANY SELECT ══ -->
+<div id="companyScreen" style="display:none">
+  <div class="company-select-page">
+    <div class="company-select-box">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px">
+        <div class="brand-logo" style="margin-bottom:0">
+          <div class="brand-icon">📋</div>
+          <div class="brand-name" style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px">AssetVerify</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign out</button>
+      </div>
+      <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:6px">Select Company</div>
+      <div style="font-size:14px;color:var(--ink2);margin-bottom:32px" id="companySelectSub">Choose a company to manage assets</div>
+      <div class="company-cards" id="companyCards"></div>
+      <button onclick="openModal('joinModal')" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--surface2);border:2px dashed var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink2);transition:all .18s;width:100%;font-family:'DM Sans',sans-serif" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--ink2)'">
+        ＋ Join another company using a code
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div id="appScreen">
+  <nav class="navbar">
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="nav-brand">
+        <div class="nav-brand-icon">📋</div>
+        <div class="nav-brand-name">AssetVerify</div>
+      </div>
+      <div class="nav-company-pill" id="navCompanyPill">🏢 Company</div>
+    </div>
+    <div class="nav-right">
+      <span id="syncStatus" title="Sync status"><span class="sync-dot" id="syncDot"></span></span>
+      <span style="font-size:12px;color:var(--ink2)" id="navUserName"></span>
+      <div class="avatar" id="navAvatar">U</div>
+      <button class="btn btn-ghost btn-sm" onclick="switchCompany()">Switch</button>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign out</button>
+    </div>
+  </nav>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Main</div>
+        <button class="sidebar-item active" onclick="showPage('dashboard')"><span class="s-icon">🏠</span> Dashboard</button>
+        <button class="sidebar-item" onclick="showPage('addAsset')"><span class="s-icon">➕</span> Add Asset</button>
+        <button class="sidebar-item" onclick="showPage('records')"><span class="s-icon">📄</span> All Records <span class="sidebar-badge" id="sidebarCount">0</span></button>
+        <button class="sidebar-item" onclick="showPage('summary')"><span class="s-icon">📊</span> Summary</button>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Account</div>
+        <button class="sidebar-item" onclick="switchCompany()"><span class="s-icon">🏢</span> Switch Company</button>
+        <button class="sidebar-item" onclick="showPage('team')"><span class="s-icon">👥</span> Team Members</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div>
+            <div class="page-title" id="dashTitle">Dashboard</div>
+            <div class="page-sub" id="dashSub">Overview of verified assets</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="showPage('addAsset')" style="width:auto">＋ Add Asset</button>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-label">Total Assets</div><div class="stat-value" id="dashTotalAssets">—</div><div class="stat-icon">📦</div></div>
+          <div class="stat-card amber"><div class="stat-label">Total Quantity</div><div class="stat-value" id="dashTotalQty">—</div><div class="stat-icon">🔢</div></div>
+          <div class="stat-card green"><div class="stat-label">Total Value</div><div class="stat-value" id="dashTotalVal">—</div><div class="stat-icon">💰</div></div>
+          <div class="stat-card blue"><div class="stat-label">Departments</div><div class="stat-value" id="dashDepts">—</div><div class="stat-icon">🏗</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="card"><div class="card-head"><h3>By Condition</h3></div><div class="card-body" id="dashCondition"><div style="color:var(--ink3);font-size:13px">Loading...</div></div></div>
+          <div class="card"><div class="card-head"><h3>Top Departments by Value</h3></div><div class="card-body" id="dashDeptSummary"><div style="color:var(--ink3);font-size:13px">Loading...</div></div></div>
+        </div>
+      </div>
+
+      <!-- ADD ASSET -->
+      <div class="page" id="page-addAsset">
+        <div class="page-header">
+          <div><div class="page-title" id="addAssetTitle">Add Asset</div><div class="page-sub">Record a new verified asset</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3 id="formCardTitle">New Asset Entry</h3></div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="field"><label>Vendor Name *</label><input type="text" id="fVendor" list="vendorList" placeholder="e.g. Dell India Pvt Ltd"><datalist id="vendorList"></datalist></div>
+              <div class="field"><label>Department *</label><input type="text" id="fDept" list="deptList" placeholder="e.g. Finance"><datalist id="deptList"></datalist></div>
+              <div class="field"><label>Asset Category</label>
+                <select id="fCategory">
+                  <option value="">Select…</option>
+                  <option>IT Equipment</option><option>Office Furniture</option><option>Machinery</option>
+                  <option>Electrical Equipment</option><option>Vehicle</option><option>Software License</option><option>Other</option>
+                </select>
+              </div>
+              <div class="field"><label>Tag No. *</label><input type="text" id="fTag" placeholder="e.g. TAG-2024-001"></div>
+              <div class="field"><label>Serial Number</label><input type="text" id="fSerial" placeholder="e.g. SN/DL/0051"></div>
+              <div class="field"><label>Condition *</label>
+                <select id="fCondition"><option>Good</option><option>Fair</option><option>Poor</option><option>Damaged</option><option>Missing</option></select>
+              </div>
+              <div class="field span2"><label>Asset Description *</label><input type="text" id="fDesc" placeholder="e.g. Dell Laptop Inspiron 15 — 16GB RAM, 512GB SSD"></div>
+              <div class="field"><label>Quantity *</label><input type="number" id="fQty" min="1" value="1"></div>
+              <div class="field"><label>Unit Amount (₹) *</label><input type="number" id="fAmount" min="0" placeholder="e.g. 55000"></div>
+              <div class="field"><label>Location / Floor</label><input type="text" id="fLocation" placeholder="e.g. 2nd Floor, Room 201"></div>
+              <div class="field"><label>Verification Date</label><input type="date" id="fDate"></div>
+              <div class="field span3"><label>Remarks</label><textarea id="fRemarks" placeholder="Any additional observations…"></textarea></div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" onclick="saveAsset()" id="saveBtn">💾 Save Asset</button>
+              <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+              <button class="btn btn-ghost" id="cancelEditBtn" style="display:none" onclick="cancelEdit()">Cancel Edit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECORDS -->
+      <div class="page" id="page-records">
+        <div class="page-header">
+          <div><div class="page-title">Asset Records</div><div class="page-sub" id="recordsSub">All verified assets</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="exportCSV()" style="width:auto">⬇ Export CSV</button>
+        </div>
+        <div class="table-toolbar">
+          <div class="field"><label>Search</label><input type="text" id="searchQ" placeholder="Tag, serial, description…" oninput="renderTable()"></div>
+          <div class="field"><label>Vendor</label><select id="filterV" onchange="renderTable()"><option value="">All Vendors</option></select></div>
+          <div class="field"><label>Department</label><select id="filterD" onchange="renderTable()"><option value="">All Depts</option></select></div>
+          <div class="field"><label>Condition</label>
+            <select id="filterC" onchange="renderTable()"><option value="">All</option><option>Good</option><option>Fair</option><option>Poor</option><option>Damaged</option><option>Missing</option></select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr>
+            <th onclick="sortBy('tagNo')">Tag No.</th>
+            <th onclick="sortBy('vendor')">Vendor</th>
+            <th onclick="sortBy('department')">Department</th>
+            <th onclick="sortBy('description')">Description</th>
+            <th onclick="sortBy('serialNo')">Serial No.</th>
+            <th onclick="sortBy('quantity')">Qty</th>
+            <th onclick="sortBy('amount')">Unit ₹</th>
+            <th onclick="sortBy('total')">Total ₹</th>
+            <th onclick="sortBy('condition')">Condition</th>
+            <th>Actions</th>
+          </tr></thead><tbody id="tableBody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="page" id="page-summary">
+        <div class="page-header"><div><div class="page-title">Summary Report</div><div class="page-sub">Live totals from cloud database</div></div></div>
+        <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card"><div class="stat-label">Grand Total Value</div><div class="stat-value" id="sumTotal">₹0</div><div class="stat-icon">💰</div></div>
+          <div class="stat-card green"><div class="stat-label">Total Line Items</div><div class="stat-value" id="sumItems">0</div><div class="stat-icon">📦</div></div>
+          <div class="stat-card amber"><div class="stat-label">Total Quantity</div><div class="stat-value" id="sumQty">0</div><div class="stat-icon">🔢</div></div>
+        </div>
+        <div class="summary-grid">
+          <div class="card"><div class="card-head"><h3>By Vendor</h3></div><div class="card-body" id="byVendor"></div></div>
+          <div class="card"><div class="card-head"><h3>By Department</h3></div><div class="card-body" id="byDept"></div></div>
+          <div class="card"><div class="card-head"><h3>By Condition</h3></div><div class="card-body" id="byCond"></div></div>
+          <div class="card"><div class="card-head"><h3>By Category</h3></div><div class="card-body" id="byCat"></div></div>
+        </div>
+      </div>
+
+      <!-- TEAM -->
+      <div class="page" id="page-team">
+        <div class="page-header"><div><div class="page-title">Team Members</div><div class="page-sub">Users with access to this company</div></div></div>
+        <div class="card"><div class="card-head"><h3>Members</h3></div><div class="card-body" id="teamList"></div></div>
+        <div style="margin-top:20px" class="card">
+          <div class="card-head"><h3>Company Code</h3></div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--ink2);margin-bottom:16px">Share this code with your colleague so they can join this company when registering.</p>
+            <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 18px">
+              <div>
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);margin-bottom:4px">Company Code</div>
+                <div id="companyCode" style="font-size:24px;font-weight:800;letter-spacing:.15em;color:var(--accent);font-family:'Syne',sans-serif"></div>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="copyCode()" style="margin-left:auto">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- JOIN COMPANY MODAL -->
+<div class="modal-overlay" id="joinModal">
+  <div class="modal">
+    <div class="modal-title">🏢 Join Another Company</div>
+    <div class="error-msg" id="joinError"></div>
+    <div class="field"><label>Company Code</label><input type="text" id="joinCode" placeholder="e.g. ACE001" style="text-transform:uppercase;letter-spacing:.1em;font-size:20px;text-align:center"></div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;color:var(--ink2);margin-bottom:16px;line-height:1.7">
+      <b>Pre-set company codes:</b><br>
+      <b>ACE001</b> — Acefone Software Pvt Ltd<br>
+      <b>SRV001</b> — Servetel Communications Pvt Ltd<br>
+      <b>SRV002</b> — Servetel Infocomm Pvt Ltd
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="joinCompany()" style="width:auto;flex:1">Join Company</button>
+      <button class="btn btn-ghost" onclick="closeModal('joinModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ════════════════════════════════════════════
+     FIREBASE SDK
+════════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+         signOut, onAuthStateChanged, updateProfile }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion,
+         collection, addDoc, query, where, onSnapshot, deleteDoc }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ══ COMPANIES MASTER LIST (always in Firestore) ══
+const COMPANIES = [
+  { id:'ace001', name:'Acefone Software Pvt Ltd',        industry:'IT / Software',      code:'ACE001', color:'#C84B2F' },
+  { id:'srv001', name:'Servetel Communications Pvt Ltd', industry:'Telecommunications', code:'SRV001', color:'#2D6A4F' },
+  { id:'srv002', name:'Servetel Infocomm Pvt Ltd',       industry:'Telecommunications', code:'SRV002', color:'#1A5276' },
+];
+
+// ══ LOCAL FALLBACK (demo mode) ══
+const LOCAL = {
+  get: k => { try { return JSON.parse(localStorage.getItem(k)) } catch { return null } },
+  set: (k,v) => localStorage.setItem(k, JSON.stringify(v)),
+  del: k => localStorage.removeItem(k)
+};
+
+let auth, db;
+let currentUser = null;
+let currentCompany = null;
+let localAssets = [];
+let assetsUnsubscribe = null;
+let editingId = null;
+let sortKey = 'tagNo', sortAsc = true;
+
+// ══ INIT ══
+window.scrollToConfig = () => alert('Open the HTML file in a text editor and paste your Firebase config at the top of the file where it says PASTE_YOUR_... values.');
+
+if (DEMO_MODE) {
+  document.getElementById('demoBanner').style.display = 'block';
+  document.getElementById('loadingOverlay').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'grid';
+  initDemoMode();
+} else {
+  try {
+    const app = initializeApp(FIREBASE_CONFIG);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    seedCompaniesInFirestore();
+    onAuthStateChanged(auth, async user => {
+      document.getElementById('loadingOverlay').style.display = 'none';
+      if (user) {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (snap.exists()) {
+          currentUser = { uid: user.uid, ...snap.data() };
+          showCompanyScreen();
+        } else {
+          document.getElementById('authScreen').style.display = 'grid';
+        }
+      } else {
+        document.getElementById('authScreen').style.display = 'grid';
+      }
+    });
+  } catch(e) {
+    console.error(e);
+    document.getElementById('loadingOverlay').style.display = 'none';
+    document.getElementById('authScreen').style.display = 'grid';
+    toast('Firebase connection error — running in demo mode', 'warning');
+    initDemoMode();
+  }
+}
+
+async function seedCompaniesInFirestore() {
+  for (const c of COMPANIES) {
+    const ref = doc(db, 'companies', c.id);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) await setDoc(ref, { ...c, members: [] });
+  }
+}
+
+// ══ AUTH ══
+window.showAuthPanel = function(panel) {
+  document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(panel + 'Panel').classList.add('active');
+  event.target.classList.add('active');
+};
+
+window.doLogin = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  if (!email || !pass) { showError('loginError','Enter your email and password.'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    if (DEMO_MODE) {
+      const users = LOCAL.get('av_users') || [];
+      const u = users.find(x => x.email.toLowerCase() === email.toLowerCase() && x.password === pass);
+      if (!u) throw new Error('Invalid credentials');
+      currentUser = u;
+      LOCAL.set('av_session', u);
+      hideError('loginError');
+      showCompanyScreen();
+    } else {
+      const cred = await signInWithEmailAndPassword(auth, email, pass);
+      const snap = await getDoc(doc(db, 'users', cred.user.uid));
+      currentUser = { uid: cred.user.uid, ...snap.data() };
+      hideError('loginError');
+      showCompanyScreen();
+    }
+  } catch(e) {
+    showError('loginError', 'Invalid email or password. Please try again.');
+  }
+  btn.disabled = false; btn.textContent = 'Sign In →';
+};
+
+window.doRegister = async function() {
+  const name      = document.getElementById('regName').value.trim();
+  const email     = document.getElementById('regEmail').value.trim();
+  const pass      = document.getElementById('regPass').value;
+  const pass2     = document.getElementById('regPass2').value;
+  const companyId = document.getElementById('regCompany').value;
+  if (!name||!email||!pass||!companyId) { showError('registerError','All fields are required.'); return; }
+  if (pass.length < 6) { showError('registerError','Password must be at least 6 characters.'); return; }
+  if (pass !== pass2) { showError('registerError','Passwords do not match.'); return; }
+  const btn = document.getElementById('registerBtn');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+  try {
+    if (DEMO_MODE) {
+      const users = LOCAL.get('av_users') || [];
+      if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) throw new Error('Email exists');
+      const u = { id:'u'+Date.now(), name, email, password:pass, companies:[companyId] };
+      users.push(u);
+      LOCAL.set('av_users', users);
+      currentUser = u;
+      LOCAL.set('av_session', u);
+    } else {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await updateProfile(cred.user, { displayName: name });
+      const userData = { name, email, companies: [companyId], createdAt: new Date().toISOString() };
+      await setDoc(doc(db, 'users', cred.user.uid), userData);
+      await updateDoc(doc(db, 'companies', companyId), { members: arrayUnion(cred.user.uid) });
+      currentUser = { uid: cred.user.uid, ...userData };
+    }
+    hideError('registerError');
+    showCompanyScreen();
+  } catch(e) {
+    showError('registerError', e.message.includes('email-already') || e.message.includes('Email exists')
+      ? 'An account with this email already exists.' : 'Registration failed: ' + e.message);
+  }
+  btn.disabled = false; btn.textContent = 'Create Account →';
+};
+
+window.doLogout = async function() {
+  if (assetsUnsubscribe) assetsUnsubscribe();
+  if (!DEMO_MODE && auth) await signOut(auth);
+  LOCAL.del('av_session');
+  currentUser = null; currentCompany = null; localAssets = [];
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('companyScreen').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'grid';
+};
+
+// ══ COMPANY SCREEN ══
+function showCompanyScreen() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('companyScreen').style.display = 'block';
+  document.getElementById('companySelectSub').textContent = `Hello ${currentUser.name}! Choose a company to manage.`;
+  renderCompanyCards();
+}
+
+async function renderCompanyCards() {
+  const myIds = currentUser.companies || [];
+  const myCompanies = COMPANIES.filter(c => myIds.includes(c.id));
+  const container = document.getElementById('companyCards');
+  if (!myCompanies.length) {
+    container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--ink2);font-size:14px">No companies yet. Use a company code to join one.</div>';
+    return;
+  }
+  const rows = await Promise.all(myCompanies.map(async c => {
+    let count = 0;
+    if (!DEMO_MODE) {
+      const snap = await getDoc(doc(db, 'companyMeta', c.id));
+      count = snap.exists() ? (snap.data().assetCount || 0) : 0;
+    } else {
+      count = (LOCAL.get('av_assets_' + c.id) || []).length;
+    }
+    return { ...c, count };
+  }));
+  container.innerHTML = rows.map(c => `
+    <div class="company-card" onclick="enterCompany('${c.id}')">
+      <div class="company-avatar" style="background:${c.color}">${c.name.charAt(0)}</div>
+      <div class="company-info"><h4>${c.name}</h4><p>${c.industry} · ${c.count} assets recorded</p></div>
+      <div class="company-arrow">›</div>
+    </div>`).join('');
+}
+
+window.enterCompany = function(id) {
+  currentCompany = COMPANIES.find(c => c.id === id);
+  if (!currentCompany) return;
+  document.getElementById('companyScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  initApp();
+};
+
+window.switchCompany = function() {
+  if (assetsUnsubscribe) { assetsUnsubscribe(); assetsUnsubscribe = null; }
+  currentCompany = null; localAssets = [];
+  document.getElementById('appScreen').style.display = 'none';
+  showCompanyScreen();
+};
+
+// ══ APP INIT ══
+function initApp() {
+  document.getElementById('navCompanyPill').textContent = '🏢 ' + currentCompany.name;
+  document.getElementById('navUserName').textContent = currentUser.name;
+  document.getElementById('navAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+  document.getElementById('dashTitle').textContent = currentCompany.name;
+  document.getElementById('companyCode').textContent = currentCompany.code;
+  document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+  setSyncDot('syncing');
+  subscribeAssets();
+  showPage('dashboard');
+}
+
+// ══ REAL-TIME SUBSCRIPTION ══
+function subscribeAssets() {
+  if (assetsUnsubscribe) assetsUnsubscribe();
+  if (DEMO_MODE) {
+    localAssets = LOCAL.get('av_assets_' + currentCompany.id) || [];
+    setSyncDot('synced');
+    renderDashboard(); updateSidebarCount();
+    return;
+  }
+  const q = query(collection(db, 'assets'), where('companyId','==', currentCompany.id));
+  assetsUnsubscribe = onSnapshot(q, snap => {
+    localAssets = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    setSyncDot('synced');
+    renderDashboard();
+    updateSidebarCount();
+    if (document.getElementById('page-records').classList.contains('active')) { updateFilters(); renderTable(); }
+    if (document.getElementById('page-summary').classList.contains('active')) renderSummary();
+  }, () => setSyncDot('error'));
+}
+
+function setSyncDot(state) {
+  const dot = document.getElementById('syncDot');
+  dot.className = 'sync-dot';
+  if (state === 'synced') { dot.classList.add('synced'); dot.title = 'Synced with cloud'; }
+  else if (state === 'syncing') { dot.classList.add('syncing'); dot.title = 'Syncing…'; }
+  else { dot.style.background='var(--danger)'; dot.title = 'Sync error'; }
+}
+
+// ══ CRUD ══
+window.saveAsset = async function() {
+  const vendor = document.getElementById('fVendor').value.trim();
+  const dept   = document.getElementById('fDept').value.trim();
+  const tag    = document.getElementById('fTag').value.trim();
+  const desc   = document.getElementById('fDesc').value.trim();
+  const qty    = parseInt(document.getElementById('fQty').value) || 0;
+  const amount = parseFloat(document.getElementById('fAmount').value) || 0;
+  if (!vendor||!dept||!tag||!desc||qty<1) { toast('Fill all required (*) fields','error'); return; }
+  const asset = {
+    companyId: currentCompany.id, vendor, department: dept, tagNo: tag, description: desc,
+    category: document.getElementById('fCategory').value,
+    serialNo: document.getElementById('fSerial').value.trim(),
+    quantity: qty, amount, total: qty * amount,
+    location: document.getElementById('fLocation').value.trim(),
+    condition: document.getElementById('fCondition').value,
+    verDate: document.getElementById('fDate').value,
+    remarks: document.getElementById('fRemarks').value.trim(),
+    updatedBy: currentUser.name,
+    updatedAt: new Date().toISOString()
+  };
+  setSyncDot('syncing');
+  try {
+    if (DEMO_MODE) {
+      let arr = LOCAL.get('av_assets_' + currentCompany.id) || [];
+      if (editingId) { arr = arr.map(a => a.id===editingId ? {...asset, id:editingId} : a); }
+      else { arr.push({...asset, id:'a'+Date.now()}); }
+      LOCAL.set('av_assets_' + currentCompany.id, arr);
+      localAssets = arr;
+      setSyncDot('synced');
+    } else {
+      if (editingId) { await updateDoc(doc(db,'assets',editingId), asset); }
+      else { await addDoc(collection(db,'assets'), asset); }
+    }
+    toast(editingId ? 'Asset updated!' : 'Asset saved!', 'success');
+    editingId = null;
+    clearForm();
+    updateDataLists();
+    if (DEMO_MODE) { renderDashboard(); updateSidebarCount(); }
+  } catch(e) { toast('Save failed: '+e.message,'error'); setSyncDot('error'); }
+};
+
+window.editAsset = function(id) {
+  const a = localAssets.find(x=>x.id===id); if(!a) return;
+  editingId = id;
+  document.getElementById('fVendor').value = a.vendor||'';
+  document.getElementById('fDept').value = a.department||'';
+  document.getElementById('fTag').value = a.tagNo||'';
+  document.getElementById('fDesc').value = a.description||'';
+  document.getElementById('fSerial').value = a.serialNo||'';
+  document.getElementById('fCategory').value = a.category||'';
+  document.getElementById('fQty').value = a.quantity;
+  document.getElementById('fAmount').value = a.amount;
+  document.getElementById('fLocation').value = a.location||'';
+  document.getElementById('fCondition').value = a.condition||'Good';
+  document.getElementById('fDate').value = a.verDate||'';
+  document.getElementById('fRemarks').value = a.remarks||'';
+  document.getElementById('saveBtn').textContent = '💾 Update Asset';
+  document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+  document.getElementById('addAssetTitle').textContent = 'Edit Asset';
+  document.getElementById('formCardTitle').textContent = 'Edit Asset Details';
+  showPage('addAsset'); window.scrollTo({top:0,behavior:'smooth'});
+};
+
+window.deleteAsset = async function(id) {
+  if (!confirm('Delete this asset record? This cannot be undone.')) return;
+  setSyncDot('syncing');
+  try {
+    if (DEMO_MODE) {
+      const arr = (LOCAL.get('av_assets_' + currentCompany.id)||[]).filter(a=>a.id!==id);
+      LOCAL.set('av_assets_' + currentCompany.id, arr);
+      localAssets = arr;
+      setSyncDot('synced');
+      renderTable(); renderDashboard(); updateSidebarCount();
+    } else {
+      await deleteDoc(doc(db,'assets',id));
+    }
+    toast('Asset deleted','warning');
+  } catch(e) { toast('Delete failed','error'); setSyncDot('error'); }
+};
+
+window.clearForm = function() {
+  ['fVendor','fDept','fTag','fDesc','fSerial','fLocation','fRemarks'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fCategory').value='';
+  document.getElementById('fCondition').value='Good';
+  document.getElementById('fQty').value=1;
+  document.getElementById('fAmount').value='';
+  document.getElementById('fDate').value=new Date().toISOString().split('T')[0];
+  editingId=null;
+  document.getElementById('saveBtn').textContent='💾 Save Asset';
+  document.getElementById('cancelEditBtn').style.display='none';
+  document.getElementById('addAssetTitle').textContent='Add Asset';
+  document.getElementById('formCardTitle').textContent='New Asset Entry';
+};
+
+window.cancelEdit = function() { editingId=null; clearForm(); };
+
+// ══ TABLE ══
+function getFiltered() {
+  const q=(document.getElementById('searchQ')?.value||'').toLowerCase();
+  const fv=document.getElementById('filterV')?.value||'';
+  const fd=document.getElementById('filterD')?.value||'';
+  const fc=document.getElementById('filterC')?.value||'';
+  return localAssets.filter(a=>{
+    const m=!q||[a.tagNo,a.serialNo,a.description,a.vendor,a.department,a.location].join(' ').toLowerCase().includes(q);
+    return m&&(!fv||a.vendor===fv)&&(!fd||a.department===fd)&&(!fc||a.condition===fc);
+  });
+}
+
+window.sortBy = function(key) {
+  if(sortKey===key) sortAsc=!sortAsc; else{sortKey=key;sortAsc=true;}
+  renderTable();
+};
+
+function renderTable() {
+  const rows=getFiltered().sort((a,b)=>{
+    let va=a[sortKey]||'',vb=b[sortKey]||'';
+    return typeof va==='number'?(sortAsc?va-vb:vb-va):(sortAsc?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va)));
+  });
+  document.getElementById('recordsSub').textContent=rows.length+' assets found';
+  const tbody=document.getElementById('tableBody');
+  if(!rows.length){
+    tbody.innerHTML=`<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">No assets found</div><div class="empty-desc">Add assets or adjust filters</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML=rows.map(a=>`<tr>
+    <td><b style="color:var(--accent);font-size:12px;font-family:monospace">${a.tagNo}</b></td>
+    <td>${a.vendor}</td><td>${a.department}</td>
+    <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.description}">${a.description}</td>
+    <td style="font-family:monospace;font-size:12px;color:var(--ink2)">${a.serialNo||'—'}</td>
+    <td style="text-align:center">${a.quantity}</td>
+    <td style="text-align:right">${fmt(a.amount)}</td>
+    <td style="text-align:right;font-weight:700">${fmt(a.total)}</td>
+    <td><span class="badge cond-${a.condition}">${a.condition}</span></td>
+    <td style="white-space:nowrap">
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="editAsset('${a.id}')" title="Edit">✏️</button>
+      <button class="btn btn-danger btn-sm btn-icon" onclick="deleteAsset('${a.id}')" title="Delete">🗑</button>
+    </td></tr>`).join('');
+}
+
+function updateFilters() {
+  const vendors=[...new Set(localAssets.map(a=>a.vendor))].sort();
+  const depts=[...new Set(localAssets.map(a=>a.department))].sort();
+  const fv=document.getElementById('filterV'),fd=document.getElementById('filterD');
+  const cv=fv.value,cd=fd.value;
+  fv.innerHTML='<option value="">All Vendors</option>'+vendors.map(v=>`<option ${v===cv?'selected':''}>${v}</option>`).join('');
+  fd.innerHTML='<option value="">All Depts</option>'+depts.map(d=>`<option ${d===cd?'selected':''}>${d}</option>`).join('');
+}
+
+// ══ DASHBOARD ══
+function renderDashboard() {
+  const assets=localAssets;
+  const total=assets.reduce((s,a)=>s+a.total,0);
+  const qty=assets.reduce((s,a)=>s+a.quantity,0);
+  const depts=new Set(assets.map(a=>a.department)).size;
+  document.getElementById('dashTotalAssets').textContent=assets.length;
+  document.getElementById('dashTotalQty').textContent=qty;
+  document.getElementById('dashTotalVal').textContent=fmtShort(total);
+  document.getElementById('dashDepts').textContent=depts;
+  document.getElementById('dashSub').textContent=`${currentCompany.name} · ${assets.length} assets · Live from cloud`;
+  const byCond={};
+  assets.forEach(a=>byCond[a.condition]=(byCond[a.condition]||0)+1);
+  const condColors={Good:'#2D6A4F',Fair:'#f57f17',Poor:'#e65100',Damaged:'#c0392b',Missing:'#6a1b9a'};
+  const condEl=document.getElementById('dashCondition');
+  condEl.innerHTML=Object.keys(byCond).length
+    ?Object.entries(byCond).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="summary-row"><span>${k}</span><span class="summary-val" style="color:${condColors[k]||'var(--accent)'}">${v} assets</span></div>`).join('')
+    :'<div style="color:var(--ink3);font-size:13px">No data yet</div>';
+  const byDept={};
+  assets.forEach(a=>byDept[a.department]=(byDept[a.department]||0)+a.total);
+  document.getElementById('dashDeptSummary').innerHTML=Object.keys(byDept).length
+    ?Object.entries(byDept).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>`<div class="summary-row"><span>${k}</span><span class="summary-val">${fmt(v)}</span></div>`).join('')
+    :'<div style="color:var(--ink3);font-size:13px">No data yet</div>';
+}
+
+function updateSidebarCount() {
+  document.getElementById('sidebarCount').textContent=localAssets.length;
+}
+
+// ══ SUMMARY ══
+function renderSummary() {
+  const assets=localAssets;
+  document.getElementById('sumTotal').textContent=fmt(assets.reduce((s,a)=>s+a.total,0));
+  document.getElementById('sumItems').textContent=assets.length;
+  document.getElementById('sumQty').textContent=assets.reduce((s,a)=>s+a.quantity,0);
+  const grp=(key,fn=a=>a.total)=>{const m={};assets.forEach(a=>m[a[key]]=(m[a[key]]||0)+fn(a));return Object.entries(m).sort((a,b)=>b[1]-a[1]);};
+  const rows=(e,isCount=false)=>e.length?e.map(([k,v])=>`<div class="summary-row"><span>${k||'—'}</span><span class="summary-val">${isCount?v+' assets':fmt(v)}</span></div>`).join(''):'<div style="color:var(--ink3);font-size:13px">No data</div>';
+  document.getElementById('byVendor').innerHTML=rows(grp('vendor'));
+  document.getElementById('byDept').innerHTML=rows(grp('department'));
+  document.getElementById('byCond').innerHTML=rows(grp('condition',()=>1),true);
+  document.getElementById('byCat').innerHTML=rows(grp('category'));
+}
+
+// ══ TEAM ══
+async function renderTeam() {
+  const el=document.getElementById('teamList');
+  el.innerHTML='<div style="color:var(--ink3);font-size:13px">Loading members…</div>';
+  if(DEMO_MODE){
+    const users=LOCAL.get('av_users')||[];
+    const members=users.filter(u=>(u.companies||[]).includes(currentCompany.id));
+    el.innerHTML=members.map(u=>`<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)"><div class="avatar" style="width:38px;height:38px;font-size:15px">${u.name.charAt(0)}</div><div><div style="font-weight:600;font-size:14px">${u.name}</div><div style="font-size:12px;color:var(--ink2)">${u.email}</div></div>${u.id===currentUser.id?'<span class="badge" style="margin-left:auto;background:var(--accent-lt);color:var(--accent)">You</span>':''}</div>`).join('')||'<div style="color:var(--ink3);font-size:13px">No members yet</div>';
+    return;
+  }
+  try {
+    const snap=await getDoc(doc(db,'companies',currentCompany.id));
+    const memberIds=snap.exists()?(snap.data().members||[]):[];
+    const memberDocs=await Promise.all(memberIds.map(uid=>getDoc(doc(db,'users',uid))));
+    const members=memberDocs.filter(d=>d.exists()).map(d=>({uid:d.id,...d.data()}));
+    el.innerHTML=members.map(u=>`<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)"><div class="avatar" style="width:38px;height:38px;font-size:15px">${u.name.charAt(0)}</div><div><div style="font-weight:600;font-size:14px">${u.name}</div><div style="font-size:12px;color:var(--ink2)">${u.email}</div></div>${u.uid===currentUser.uid?'<span class="badge" style="margin-left:auto;background:var(--accent-lt);color:var(--accent)">You</span>':''}</div>`).join('')||'<div style="color:var(--ink3);font-size:13px">No members found</div>';
+  } catch(e){ el.innerHTML='<div style="color:var(--ink3);font-size:13px">Could not load members</div>'; }
+}
+
+window.copyCode = function() { navigator.clipboard.writeText(currentCompany.code).then(()=>toast('Code copied!','success')); };
+
+// ══ JOIN COMPANY ══
+window.joinCompany = async function() {
+  const code=document.getElementById('joinCode').value.trim().toUpperCase();
+  if(!code){showError('joinError','Enter a company code.');return;}
+  const company=COMPANIES.find(c=>c.code===code);
+  if(!company){showError('joinError','No company found with that code.');return;}
+  if((currentUser.companies||[]).includes(company.id)){showError('joinError','You already have access to this company.');return;}
+  try{
+    if(DEMO_MODE){
+      const users=LOCAL.get('av_users')||[];
+      const idx=users.findIndex(u=>u.id===currentUser.id);
+      users[idx].companies=[...(users[idx].companies||[]),company.id];
+      LOCAL.set('av_users',users);
+      currentUser=users[idx]; LOCAL.set('av_session',currentUser);
+    }else{
+      await updateDoc(doc(db,'users',currentUser.uid),{companies:arrayUnion(company.id)});
+      await updateDoc(doc(db,'companies',company.id),{members:arrayUnion(currentUser.uid)});
+      currentUser.companies=[...(currentUser.companies||[]),company.id];
+    }
+    closeModal('joinModal');
+    toast('Joined '+company.name+'!','success');
+    renderCompanyCards();
+  }catch(e){showError('joinError','Failed to join: '+e.message);}
+};
+
+// ══ EXPORT ══
+window.exportCSV = function() {
+  const rows=getFiltered();
+  if(!rows.length){toast('No records to export','error');return;}
+  const h=['Tag No','Vendor','Department','Category','Description','Serial No','Quantity','Unit Amount','Total Amount','Condition','Location','Verification Date','Remarks'];
+  const csv=[h.join(','),...rows.map(a=>[a.tagNo,a.vendor,a.department,a.category||'',`"${a.description}"`,a.serialNo||'',a.quantity,a.amount,a.total,a.condition,a.location||'',a.verDate||'',`"${a.remarks||''}"`].join(','))].join('\n');
+  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  const l=document.createElement('a');l.href=url;
+  l.download=`${currentCompany.name.replace(/\s+/g,'_')}_assets_${new Date().toISOString().split('T')[0]}.csv`;
+  l.click(); URL.revokeObjectURL(url);
+  toast('CSV exported!','success');
+};
+
+// ══ NAVIGATION ══
+window.showPage = function(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(b=>{
+    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(name)) b.classList.add('active');
+  });
+  if(name==='records'){updateFilters();renderTable();}
+  if(name==='summary') renderSummary();
+  if(name==='team') renderTeam();
+  if(name==='addAsset'){
+    document.getElementById('addAssetTitle').textContent=editingId?'Edit Asset':'Add Asset';
+    document.getElementById('formCardTitle').textContent=editingId?'Edit Asset Details':'New Asset Entry';
+    updateDataLists();
+  }
+};
+
+function updateDataLists(){
+  const vendors=[...new Set(localAssets.map(a=>a.vendor))].sort();
+  const depts=[...new Set(localAssets.map(a=>a.department))].sort();
+  document.getElementById('vendorList').innerHTML=vendors.map(v=>`<option value="${v}">`).join('');
+  document.getElementById('deptList').innerHTML=depts.map(d=>`<option value="${d}">`).join('');
+}
+
+// ══ DEMO MODE ══
+function initDemoMode(){
+  if(!LOCAL.get('av_users')) LOCAL.set('av_users',[]);
+}
+
+// ══ HELPERS ══
+function fmt(n){return'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:0})}
+function fmtShort(n){if(n>=1e7)return'₹'+(n/1e7).toFixed(1)+'Cr';if(n>=1e5)return'₹'+(n/1e5).toFixed(1)+'L';if(n>=1e3)return'₹'+(n/1e3).toFixed(0)+'K';return'₹'+n}
+window.toast=function(msg,type=''){
+  const c=document.getElementById('toastContainer');
+  const el=document.createElement('div');
+  el.className='toast '+type;
+  el.textContent=(type==='success'?'✓ ':type==='error'?'✕ ':type==='warning'?'⚠ ':'')+msg;
+  c.appendChild(el);
+  setTimeout(()=>el.classList.add('show'),50);
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},3000);
+};
+window.openModal=id=>document.getElementById(id).classList.add('show');
+window.closeModal=id=>document.getElementById(id).classList.remove('show');
+window.showError=(id,msg)=>{const el=document.getElementById(id);el.textContent=msg;el.classList.add('show')};
+window.hideError=id=>document.getElementById(id).classList.remove('show');
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')}));
+</script>
+</body>
+</html>
