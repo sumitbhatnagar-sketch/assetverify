@@ -322,6 +322,7 @@ tr:hover td{background:var(--bg)}
         <button class="sidebar-item" onclick="showPage('addAsset')"><span class="s-icon">➕</span> Add Asset</button>
         <button class="sidebar-item" onclick="showPage('records')"><span class="s-icon">📄</span> All Records <span class="sidebar-badge" id="sidebarCount">0</span></button>
         <button class="sidebar-item" onclick="showPage('summary')"><span class="s-icon">📊</span> Summary</button>
+        <button class="sidebar-item" onclick="showPage('import')"><span class="s-icon">📥</span> Import CSV</button>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-label">Account</div>
@@ -456,6 +457,65 @@ tr:hover td{background:var(--bg)}
         </div>
       </div>
 
+
+      <!-- IMPORT PAGE -->
+      <div class="page" id="page-import">
+        <div class="page-header">
+          <div><div class="page-title">Import Assets</div><div class="page-sub">Bulk upload assets from a CSV file into this company</div></div>
+        </div>
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-head"><h3>📋 Required CSV Columns</h3></div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--ink2);margin-bottom:12px">Your CSV must have these exact column headers (case-sensitive):</p>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:var(--ink);line-height:2">
+              Tag No, Vendor, Department, Category, Description, Serial No, Quantity, Unit Amount, Total Amount, Condition, Location, Verification Date, Remarks
+            </div>
+            <p style="font-size:12px;color:var(--ink3);margin-top:10px">💡 Condition must be one of: Good, Fair, Poor, Damaged, Missing. Dates should be YYYY-MM-DD format.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>📤 Upload CSV File</h3></div>
+          <div class="card-body">
+            <div id="importDropZone" onclick="document.getElementById('csvFileInput').click()" style="border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--accent-lt)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='transparent'">
+              <div style="font-size:48px;margin-bottom:12px">📂</div>
+              <div style="font-size:16px;font-weight:700;margin-bottom:6px">Click to select CSV file</div>
+              <div style="font-size:13px;color:var(--ink2)">or drag and drop your file here</div>
+              <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleCSVFile(event)">
+            </div>
+            <div id="importPreview" style="display:none;margin-top:20px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                <div>
+                  <div style="font-weight:700;font-size:15px" id="importFileName"></div>
+                  <div style="font-size:13px;color:var(--ink2)" id="importStats"></div>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <button class="btn btn-ghost btn-sm" onclick="clearImport()">✕ Clear</button>
+                  <button class="btn btn-primary btn-sm" id="importBtn" onclick="runImport()" style="width:auto">🚀 Import to Firebase</button>
+                </div>
+              </div>
+              <div class="table-wrap" style="max-height:320px;overflow-y:auto">
+                <table><thead><tr>
+                  <th>Tag No</th><th>Vendor</th><th>Dept</th><th>Description</th>
+                  <th>Qty</th><th>Unit ₹</th><th>Total ₹</th><th>Condition</th>
+                </tr></thead><tbody id="importTableBody"></tbody></table>
+              </div>
+            </div>
+            <div id="importProgress" style="display:none;margin-top:20px">
+              <div style="font-weight:600;font-size:14px;margin-bottom:8px" id="importProgressText">Importing...</div>
+              <div style="background:var(--border);border-radius:20px;height:8px;overflow:hidden">
+                <div id="importProgressBar" style="background:var(--accent);height:100%;width:0%;transition:width .3s;border-radius:20px"></div>
+              </div>
+              <div style="font-size:12px;color:var(--ink2);margin-top:6px" id="importProgressCount"></div>
+            </div>
+            <div id="importSuccess" style="display:none;margin-top:20px;background:var(--success-lt);border:1px solid #b7dfc8;border-radius:12px;padding:20px;text-align:center">
+              <div style="font-size:36px;margin-bottom:8px">✅</div>
+              <div style="font-weight:700;font-size:16px;color:var(--success)" id="importSuccessText"></div>
+              <div style="font-size:13px;color:var(--ink2);margin-top:4px">All assets are now live in Firebase</div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="showPage('records')">View All Records →</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 </div>
@@ -956,6 +1016,146 @@ function updateDataLists(){
   document.getElementById('vendorList').innerHTML=vendors.map(v=>`<option value="${v}">`).join('');
   document.getElementById('deptList').innerHTML=depts.map(d=>`<option value="${d}">`).join('');
 }
+
+
+// ══ CSV IMPORT ══
+let importData = [];
+
+window.handleCSVFile = function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const lines = text.split('\n').filter(l => l.trim());
+    if (lines.length < 2) { toast('CSV file is empty or invalid', 'error'); return; }
+
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+    importData = [];
+    const errors = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      // Handle commas inside quoted fields
+      const cols = [];
+      let cur = '', inQ = false;
+      for (const ch of lines[i]) {
+        if (ch === '"') inQ = !inQ;
+        else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+        else cur += ch;
+      }
+      cols.push(cur.trim());
+
+      if (cols.every(c => !c)) continue;
+
+      const row = {};
+      headers.forEach((h, idx) => row[h] = (cols[idx] || '').replace(/^"|"$/g, '').trim());
+
+      // Validate required fields
+      if (!row['Tag No']) row['Tag No'] = 'IMP-' + (i);
+      if (!row['Vendor']) { errors.push('Row ' + (i+1) + ': Missing Vendor'); continue; }
+      if (!row['Description']) { errors.push('Row ' + (i+1) + ': Missing Description'); continue; }
+
+      // Validate condition
+      const validConds = ['Good','Fair','Poor','Damaged','Missing'];
+      if (!validConds.includes(row['Condition'])) row['Condition'] = 'Good';
+
+      row['Quantity'] = parseInt(row['Quantity']) || 1;
+      row['Unit Amount'] = parseFloat(row['Unit Amount']) || 0;
+      row['Total Amount'] = row['Quantity'] * row['Unit Amount'];
+
+      importData.push(row);
+    }
+
+    if (errors.length) toast(errors.length + ' rows skipped: ' + errors[0], 'warning');
+
+    // Show preview
+    document.getElementById('importFileName').textContent = '📄 ' + file.name;
+    document.getElementById('importStats').textContent =
+      importData.length + ' assets ready · Total value: ' +
+      fmt(importData.reduce((s,r) => s + r['Total Amount'], 0));
+    document.getElementById('importPreview').style.display = 'block';
+    document.getElementById('importSuccess').style.display = 'none';
+
+    // Render preview table
+    const tbody = document.getElementById('importTableBody');
+    tbody.innerHTML = importData.slice(0, 50).map(r => `<tr>
+      <td><b style="color:var(--accent);font-family:monospace;font-size:11px">${r['Tag No']}</b></td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r['Vendor']}</td>
+      <td>${r['Department']||'—'}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r['Description']}</td>
+      <td style="text-align:center">${r['Quantity']}</td>
+      <td style="text-align:right">${fmt(r['Unit Amount'])}</td>
+      <td style="text-align:right;font-weight:700">${fmt(r['Total Amount'])}</td>
+      <td><span class="badge cond-${r['Condition']}">${r['Condition']}</span></td>
+    </tr>`).join('');
+    if (importData.length > 50) {
+      tbody.innerHTML += `<tr><td colspan="8" style="text-align:center;color:var(--ink3);font-style:italic;padding:12px">... and ${importData.length - 50} more rows (all will be imported)</td></tr>`;
+    }
+  };
+  reader.readAsText(file);
+};
+
+window.clearImport = function() {
+  importData = [];
+  document.getElementById('csvFileInput').value = '';
+  document.getElementById('importPreview').style.display = 'none';
+  document.getElementById('importProgress').style.display = 'none';
+  document.getElementById('importSuccess').style.display = 'none';
+};
+
+window.runImport = async function() {
+  if (!importData.length) { toast('No data to import', 'error'); return; }
+  const btn = document.getElementById('importBtn');
+  btn.disabled = true;
+  document.getElementById('importProgress').style.display = 'block';
+  document.getElementById('importSuccess').style.display = 'none';
+
+  let done = 0;
+  const total = importData.length;
+  const BATCH = 10; // import in batches
+
+  try {
+    for (let i = 0; i < importData.length; i += BATCH) {
+      const batch = importData.slice(i, i + BATCH);
+      await Promise.all(batch.map(r => addDoc(collection(db, 'assets'), {
+        companyId:   currentCompany.id,
+        tagNo:       r['Tag No'] || '',
+        vendor:      r['Vendor'] || '',
+        department:  r['Department'] || '',
+        category:    r['Category'] || '',
+        description: r['Description'] || '',
+        serialNo:    r['Serial No'] || '',
+        quantity:    r['Quantity'] || 1,
+        amount:      r['Unit Amount'] || 0,
+        total:       r['Total Amount'] || 0,
+        condition:   r['Condition'] || 'Good',
+        location:    r['Location'] || '',
+        verDate:     r['Verification Date'] || '',
+        remarks:     r['Remarks'] || '',
+        updatedBy:   currentUser.name,
+        updatedAt:   new Date().toISOString(),
+        importedAt:  new Date().toISOString()
+      })));
+      done += batch.length;
+      const pct = Math.round((done/total)*100);
+      document.getElementById('importProgressBar').style.width = pct + '%';
+      document.getElementById('importProgressText').textContent = 'Importing... ' + pct + '%';
+      document.getElementById('importProgressCount').textContent = done + ' of ' + total + ' assets uploaded to Firebase';
+    }
+
+    document.getElementById('importProgress').style.display = 'none';
+    document.getElementById('importSuccess').style.display = 'block';
+    document.getElementById('importSuccessText').textContent = total + ' assets imported successfully into ' + currentCompany.name + '!';
+    toast(total + ' assets imported!', 'success');
+    importData = [];
+    document.getElementById('csvFileInput').value = '';
+    document.getElementById('importPreview').style.display = 'none';
+  } catch(e) {
+    toast('Import failed: ' + e.message, 'error');
+    document.getElementById('importProgressText').textContent = 'Import failed: ' + e.message;
+  }
+  btn.disabled = false;
+};
 
 // ══ HELPERS ══
 function fmt(n){return'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:0})}
