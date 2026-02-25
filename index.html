@@ -20,7 +20,6 @@
     appId:             "1:901635583380:web:ac03d48bd485fd711cb381"
   };
   // Set to false once you've pasted real values above
-  const DEMO_MODE = false; // Firebase config is connected
 </script>
 
 <style>
@@ -93,9 +92,6 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{font-size:14px;color:var(--ink2);font-weight:500}
 
-/* ── DEMO BANNER ── */
-#demoBanner{background:var(--accent2);color:var(--ink);padding:10px 20px;text-align:center;font-size:13px;font-weight:600;display:none}
-#demoBanner a{color:var(--ink);text-decoration:underline;cursor:pointer}
 
 /* ── MAIN APP ── */
 #appScreen{display:none;min-height:100vh}
@@ -208,11 +204,6 @@ tr:hover td{background:var(--bg)}
 </style>
 </head>
 <body>
-
-<!-- DEMO MODE BANNER -->
-<div id="demoBanner">
-  ⚠️ Running in DEMO MODE — data stored locally only. <a onclick="scrollToConfig()">Click here to connect Firebase</a> for live cloud sync.
-</div>
 
 <!-- LOADING OVERLAY -->
 <div id="loadingOverlay">
@@ -525,40 +516,36 @@ let editingId = null;
 let sortKey = 'tagNo', sortAsc = true;
 
 // ══ INIT ══
-window.scrollToConfig = () => alert('Open the HTML file in a text editor and paste your Firebase config at the top of the file where it says PASTE_YOUR_... values.');
-
-if (DEMO_MODE) {
-  document.getElementById('demoBanner').style.display = 'block';
-  document.getElementById('loadingOverlay').style.display = 'none';
-  document.getElementById('authScreen').style.display = 'grid';
-  initDemoMode();
-} else {
-  try {
-    const app = initializeApp(FIREBASE_CONFIG);
-    auth = getAuth(app);
-    db = getFirestore(app);
-    seedCompaniesInFirestore();
-    onAuthStateChanged(auth, async user => {
-      document.getElementById('loadingOverlay').style.display = 'none';
-      if (user) {
+// ── Firebase Init ──
+try {
+  const app = initializeApp(FIREBASE_CONFIG);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  seedCompaniesInFirestore();
+  onAuthStateChanged(auth, async user => {
+    document.getElementById('loadingOverlay').style.display = 'none';
+    if (user) {
+      try {
         const snap = await getDoc(doc(db, 'users', user.uid));
         if (snap.exists()) {
           currentUser = { uid: user.uid, ...snap.data() };
+          if (!currentUser.companies) currentUser.companies = [];
           showCompanyScreen();
         } else {
           document.getElementById('authScreen').style.display = 'grid';
         }
-      } else {
+      } catch(e) {
+        console.error('Error loading user:', e);
         document.getElementById('authScreen').style.display = 'grid';
       }
-    });
-  } catch(e) {
-    console.error(e);
-    document.getElementById('loadingOverlay').style.display = 'none';
-    document.getElementById('authScreen').style.display = 'grid';
-    toast('Firebase connection error — running in demo mode', 'warning');
-    initDemoMode();
-  }
+    } else {
+      document.getElementById('authScreen').style.display = 'grid';
+    }
+  });
+} catch(e) {
+  console.error('Firebase init error:', e);
+  document.getElementById('loadingOverlay').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'grid';
 }
 
 async function seedCompaniesInFirestore() {
@@ -584,21 +571,12 @@ window.doLogin = async function() {
   const btn = document.getElementById('loginBtn');
   btn.disabled = true; btn.textContent = 'Signing in…';
   try {
-    if (DEMO_MODE) {
-      const users = LOCAL.get('av_users') || [];
-      const u = users.find(x => x.email.toLowerCase() === email.toLowerCase() && x.password === pass);
-      if (!u) throw new Error('Invalid credentials');
-      currentUser = u;
-      LOCAL.set('av_session', u);
-      hideError('loginError');
-      showCompanyScreen();
-    } else {
-      const cred = await signInWithEmailAndPassword(auth, email, pass);
-      const snap = await getDoc(doc(db, 'users', cred.user.uid));
-      currentUser = { uid: cred.user.uid, ...snap.data() };
-      hideError('loginError');
-      showCompanyScreen();
-    }
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    const snap = await getDoc(doc(db, 'users', cred.user.uid));
+    currentUser = { uid: cred.user.uid, ...snap.data() };
+    if (!currentUser.companies) currentUser.companies = [];
+    hideError('loginError');
+    showCompanyScreen();
   } catch(e) {
     showError('loginError', 'Invalid email or password. Please try again.');
   }
@@ -617,22 +595,12 @@ window.doRegister = async function() {
   const btn = document.getElementById('registerBtn');
   btn.disabled = true; btn.textContent = 'Creating account…';
   try {
-    if (DEMO_MODE) {
-      const users = LOCAL.get('av_users') || [];
-      if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) throw new Error('Email exists');
-      const u = { id:'u'+Date.now(), name, email, password:pass, companies:[companyId] };
-      users.push(u);
-      LOCAL.set('av_users', users);
-      currentUser = u;
-      LOCAL.set('av_session', u);
-    } else {
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      await updateProfile(cred.user, { displayName: name });
-      const userData = { name, email, companies: [companyId], createdAt: new Date().toISOString() };
-      await setDoc(doc(db, 'users', cred.user.uid), userData);
-      await updateDoc(doc(db, 'companies', companyId), { members: arrayUnion(cred.user.uid) });
-      currentUser = { uid: cred.user.uid, ...userData };
-    }
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(cred.user, { displayName: name });
+    const userData = { name, email, companies: [companyId], createdAt: new Date().toISOString() };
+    await setDoc(doc(db, 'users', cred.user.uid), userData);
+    await updateDoc(doc(db, 'companies', companyId), { members: arrayUnion(cred.user.uid) });
+    currentUser = { uid: cred.user.uid, ...userData };
     hideError('registerError');
     showCompanyScreen();
   } catch(e) {
@@ -644,8 +612,7 @@ window.doRegister = async function() {
 
 window.doLogout = async function() {
   if (assetsUnsubscribe) assetsUnsubscribe();
-  if (!DEMO_MODE && auth) await signOut(auth);
-  LOCAL.del('av_session');
+  if (auth) await signOut(auth);
   currentUser = null; currentCompany = null; localAssets = [];
   document.getElementById('appScreen').style.display = 'none';
   document.getElementById('companyScreen').style.display = 'none';
@@ -662,27 +629,36 @@ function showCompanyScreen() {
 }
 
 async function renderCompanyCards() {
-  const myIds = currentUser.companies || [];
-  const myCompanies = COMPANIES.filter(c => myIds.includes(c.id));
   const container = document.getElementById('companyCards');
+  container.innerHTML = '<div style="color:var(--ink3);font-size:13px;padding:16px">Loading companies...</div>';
+
+  // Re-fetch user from Firestore to get latest companies list
+  let myIds = currentUser.companies || [];
+  try {
+    const freshSnap = await getDoc(doc(db, 'users', currentUser.uid));
+    if (freshSnap.exists()) {
+      myIds = freshSnap.data().companies || [];
+      currentUser = { ...currentUser, companies: myIds };
+    }
+  } catch(e) { console.warn('Could not refresh user:', e); }
+
+  const myCompanies = COMPANIES.filter(c => myIds.includes(c.id));
+
   if (!myCompanies.length) {
-    container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--ink2);font-size:14px">No companies yet. Use a company code to join one.</div>';
+    container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--ink2);font-size:14px">No companies yet. Use the button below to join one.</div>';
     return;
   }
-  const rows = await Promise.all(myCompanies.map(async c => {
-    let count = 0;
-    if (!DEMO_MODE) {
-      const snap = await getDoc(doc(db, 'companyMeta', c.id));
-      count = snap.exists() ? (snap.data().assetCount || 0) : 0;
-    } else {
-      count = (LOCAL.get('av_assets_' + c.id) || []).length;
-    }
-    return { ...c, count };
-  }));
+
+  // Get asset counts from Firestore
+  const rows = myCompanies.map(c => ({ ...c, count: 0 }));
+
   container.innerHTML = rows.map(c => `
     <div class="company-card" onclick="enterCompany('${c.id}')">
-      <div class="company-avatar" style="background:${c.color}">${c.name.charAt(0)}</div>
-      <div class="company-info"><h4>${c.name}</h4><p>${c.industry} · ${c.count} assets recorded</p></div>
+      <div class="company-avatar" style="background:${c.color}">${c.name.charAt(0).toUpperCase()}</div>
+      <div class="company-info">
+        <h4>${c.name}</h4>
+        <p>${c.industry}</p>
+      </div>
       <div class="company-arrow">›</div>
     </div>`).join('');
 }
@@ -718,12 +694,6 @@ function initApp() {
 // ══ REAL-TIME SUBSCRIPTION ══
 function subscribeAssets() {
   if (assetsUnsubscribe) assetsUnsubscribe();
-  if (DEMO_MODE) {
-    localAssets = LOCAL.get('av_assets_' + currentCompany.id) || [];
-    setSyncDot('synced');
-    renderDashboard(); updateSidebarCount();
-    return;
-  }
   const q = query(collection(db, 'assets'), where('companyId','==', currentCompany.id));
   assetsUnsubscribe = onSnapshot(q, snap => {
     localAssets = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -766,22 +736,12 @@ window.saveAsset = async function() {
   };
   setSyncDot('syncing');
   try {
-    if (DEMO_MODE) {
-      let arr = LOCAL.get('av_assets_' + currentCompany.id) || [];
-      if (editingId) { arr = arr.map(a => a.id===editingId ? {...asset, id:editingId} : a); }
-      else { arr.push({...asset, id:'a'+Date.now()}); }
-      LOCAL.set('av_assets_' + currentCompany.id, arr);
-      localAssets = arr;
-      setSyncDot('synced');
-    } else {
-      if (editingId) { await updateDoc(doc(db,'assets',editingId), asset); }
-      else { await addDoc(collection(db,'assets'), asset); }
-    }
+    if (editingId) { await updateDoc(doc(db,'assets',editingId), asset); }
+    else { await addDoc(collection(db,'assets'), asset); }
     toast(editingId ? 'Asset updated!' : 'Asset saved!', 'success');
     editingId = null;
     clearForm();
     updateDataLists();
-    if (DEMO_MODE) { renderDashboard(); updateSidebarCount(); }
   } catch(e) { toast('Save failed: '+e.message,'error'); setSyncDot('error'); }
 };
 
@@ -811,15 +771,7 @@ window.deleteAsset = async function(id) {
   if (!confirm('Delete this asset record? This cannot be undone.')) return;
   setSyncDot('syncing');
   try {
-    if (DEMO_MODE) {
-      const arr = (LOCAL.get('av_assets_' + currentCompany.id)||[]).filter(a=>a.id!==id);
-      LOCAL.set('av_assets_' + currentCompany.id, arr);
-      localAssets = arr;
-      setSyncDot('synced');
-      renderTable(); renderDashboard(); updateSidebarCount();
-    } else {
-      await deleteDoc(doc(db,'assets',id));
-    }
+    await deleteDoc(doc(db,'assets',id));
     toast('Asset deleted','warning');
   } catch(e) { toast('Delete failed','error'); setSyncDot('error'); }
 };
@@ -939,12 +891,6 @@ function renderSummary() {
 async function renderTeam() {
   const el=document.getElementById('teamList');
   el.innerHTML='<div style="color:var(--ink3);font-size:13px">Loading members…</div>';
-  if(DEMO_MODE){
-    const users=LOCAL.get('av_users')||[];
-    const members=users.filter(u=>(u.companies||[]).includes(currentCompany.id));
-    el.innerHTML=members.map(u=>`<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)"><div class="avatar" style="width:38px;height:38px;font-size:15px">${u.name.charAt(0)}</div><div><div style="font-weight:600;font-size:14px">${u.name}</div><div style="font-size:12px;color:var(--ink2)">${u.email}</div></div>${u.id===currentUser.id?'<span class="badge" style="margin-left:auto;background:var(--accent-lt);color:var(--accent)">You</span>':''}</div>`).join('')||'<div style="color:var(--ink3);font-size:13px">No members yet</div>';
-    return;
-  }
   try {
     const snap=await getDoc(doc(db,'companies',currentCompany.id));
     const memberIds=snap.exists()?(snap.data().members||[]):[];
@@ -964,17 +910,9 @@ window.joinCompany = async function() {
   if(!company){showError('joinError','No company found with that code.');return;}
   if((currentUser.companies||[]).includes(company.id)){showError('joinError','You already have access to this company.');return;}
   try{
-    if(DEMO_MODE){
-      const users=LOCAL.get('av_users')||[];
-      const idx=users.findIndex(u=>u.id===currentUser.id);
-      users[idx].companies=[...(users[idx].companies||[]),company.id];
-      LOCAL.set('av_users',users);
-      currentUser=users[idx]; LOCAL.set('av_session',currentUser);
-    }else{
-      await updateDoc(doc(db,'users',currentUser.uid),{companies:arrayUnion(company.id)});
-      await updateDoc(doc(db,'companies',company.id),{members:arrayUnion(currentUser.uid)});
-      currentUser.companies=[...(currentUser.companies||[]),company.id];
-    }
+    await updateDoc(doc(db,'users',currentUser.uid),{companies:arrayUnion(company.id)});
+    await updateDoc(doc(db,'companies',company.id),{members:arrayUnion(currentUser.uid)});
+    currentUser.companies=[...(currentUser.companies||[]),company.id];
     closeModal('joinModal');
     toast('Joined '+company.name+'!','success');
     renderCompanyCards();
@@ -1017,11 +955,6 @@ function updateDataLists(){
   const depts=[...new Set(localAssets.map(a=>a.department))].sort();
   document.getElementById('vendorList').innerHTML=vendors.map(v=>`<option value="${v}">`).join('');
   document.getElementById('deptList').innerHTML=depts.map(d=>`<option value="${d}">`).join('');
-}
-
-// ══ DEMO MODE ══
-function initDemoMode(){
-  if(!LOCAL.get('av_users')) LOCAL.set('av_users',[]);
 }
 
 // ══ HELPERS ══
