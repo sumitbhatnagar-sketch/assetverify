@@ -3,13 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AssetVerify — Asset Verification Platform</title>
+<title>AssetVerify v2 — Asset Verification Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-<!-- ════════════════════════════════════════════════════════
-     🔥 FIREBASE CONFIG — PASTE YOUR VALUES HERE
-     Get these from: Firebase Console → Project Settings → Your Apps → Config
-════════════════════════════════════════════════════════ -->
 <script>
   const FIREBASE_CONFIG = {
     apiKey:            "AIzaSyBqcUr_9hiKa2ybosZsKlnMDMu5zGG7ZmM",
@@ -19,17 +14,15 @@
     messagingSenderId: "901635583380",
     appId:             "1:901635583380:web:ac03d48bd485fd711cb381"
   };
-  // Set to false once you've pasted real values above
 </script>
-
 <style>
-:root {
-  --bg:#F5F3EE; --surface:#FFF; --surface2:#EDEBE5; --ink:#1A1714;
-  --ink2:#6B6560; --ink3:#9B958F; --accent:#C84B2F; --accent2:#E8A020;
-  --accent-lt:#FBF0ED; --border:#DDD9D2; --success:#2D6A4F;
-  --success-lt:#E8F5EE; --danger:#C0392B; --danger-lt:#FDEDEC;
-  --shadow:0 2px 12px rgba(26,23,20,.08); --shadow-lg:0 8px 40px rgba(26,23,20,.14);
-  --radius:12px; --radius-sm:8px;
+:root{
+  --bg:#F5F3EE;--surface:#FFF;--surface2:#EDEBE5;--ink:#1A1714;
+  --ink2:#6B6560;--ink3:#9B958F;--accent:#C84B2F;--accent2:#E8A020;
+  --accent-lt:#FBF0ED;--border:#DDD9D2;--success:#2D6A4F;
+  --success-lt:#E8F5EE;--danger:#C0392B;--danger-lt:#FDEDEC;
+  --shadow:0 2px 12px rgba(26,23,20,.08);--shadow-lg:0 8px 40px rgba(26,23,20,.14);
+  --radius:12px;--radius-sm:8px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -39,7 +32,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
-/* ── AUTH ── */
+/* AUTH */
 #authScreen{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
 .auth-left{background:var(--ink);color:#fff;padding:60px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
 .auth-left::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(200,75,47,.3) 0%,transparent 70%);top:-100px;left:-100px;pointer-events:none}
@@ -64,12 +57,15 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .auth-panel{display:none}
 .auth-panel.active{display:block}
 
-/* ── FORM ELEMENTS ── */
+/* FORMS */
 .field{margin-bottom:18px}
 .field label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2);margin-bottom:6px}
 .field input,.field select,.field textarea{width:100%;padding:12px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .18s,box-shadow .18s}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,75,47,.1)}
 .field textarea{resize:vertical;min-height:72px}
+.field input.dup-warn{border-color:var(--accent2)!important;box-shadow:0 0 0 3px rgba(232,160,32,.15)!important}
+.dup-hint{font-size:11px;color:var(--accent2);margin-top:4px;display:none}
+.dup-hint.show{display:block}
 .btn{padding:12px 24px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .18s;display:inline-flex;align-items:center;gap:8px}
 .btn-primary{background:var(--accent);color:#fff;width:100%;justify-content:center;font-size:15px;padding:14px}
 .btn-primary:hover{background:#b03f25;transform:translateY(-1px);box-shadow:0 4px 20px rgba(200,75,47,.3)}
@@ -84,16 +80,13 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
 .error-msg{background:var(--danger-lt);border:1px solid #f5c6c2;border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--danger);margin-bottom:16px;display:none}
 .error-msg.show{display:block}
-.info-box{background:var(--success-lt);border:1px solid #b7dfc8;border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--success);line-height:1.7;margin-top:16px}
 
-/* ── LOADING OVERLAY ── */
+/* LOADING */
 #loadingOverlay{position:fixed;inset:0;background:rgba(255,255,255,.92);z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
 .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:14px;color:var(--ink2);font-weight:500}
 
-
-/* ── MAIN APP ── */
+/* MAIN APP */
 #appScreen{display:none;min-height:100vh}
 .navbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:var(--shadow)}
 .nav-brand{display:flex;align-items:center;gap:10px}
@@ -137,7 +130,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif}
 .form-actions{display:flex;gap:10px;margin-top:6px}
 .form-actions .btn-primary{width:auto;flex:1}
 .table-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
-.table-toolbar .field{margin-bottom:0;min-width:160px}
+.table-toolbar .field{margin-bottom:0;min-width:140px}
 .table-toolbar .field input,.table-toolbar .field select{padding:9px 12px;font-size:13px}
 .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -176,15 +169,29 @@ tr:hover td{background:var(--bg)}
 .company-info h4{font-size:15px;font-weight:700;margin-bottom:3px}
 .company-info p{font-size:12px;color:var(--ink2)}
 .company-arrow{margin-left:auto;color:var(--ink3);font-size:18px}
+/* Condition badges */
 .cond-Good{background:#e8f5ee;color:#2d6a4f}
 .cond-Fair{background:#fff8e1;color:#f57f17}
 .cond-Poor{background:#fff3e0;color:#e65100}
 .cond-Damaged{background:#fdedec;color:#c0392b}
 .cond-Missing{background:#f3e5f5;color:#6a1b9a}
+/* Status badges */
+.status-Active{background:#e8f5ee;color:#2d6a4f}
+.status-Sold{background:#e3f2fd;color:#1565c0}
+.status-Scrapped{background:#fbe9e7;color:#bf360c}
+.status-Discarded{background:#f3e5f5;color:#6a1b9a}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:#ccc;display:inline-block;margin-left:4px}
 .sync-dot.synced{background:var(--success)}
 .sync-dot.syncing{background:var(--accent2);animation:pulse .8s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* Bucket tabs */
+.bucket-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.bucket-tab{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--ink2);transition:all .15s}
+.bucket-tab:hover{border-color:var(--accent);color:var(--accent)}
+.bucket-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* Depreciation table */
+.dep-table th{background:var(--surface2)}
+.dep-rate-cell{font-family:monospace;font-size:12px;color:var(--ink2)}
 @media(max-width:900px){
   #authScreen{grid-template-columns:1fr}
   .auth-left{display:none}
@@ -205,13 +212,12 @@ tr:hover td{background:var(--bg)}
 </head>
 <body>
 
-<!-- LOADING OVERLAY -->
 <div id="loadingOverlay">
   <div class="spinner"></div>
-  <div class="loading-text">Connecting to AssetVerify...</div>
+  <div style="font-size:14px;color:var(--ink2);font-weight:500">Loading AssetVerify v2...</div>
 </div>
 
-<!-- ══ AUTH SCREEN ══ -->
+<!-- AUTH SCREEN -->
 <div id="authScreen" style="display:none">
   <div class="auth-left">
     <div class="brand">
@@ -225,34 +231,35 @@ tr:hover td{background:var(--bg)}
     <div class="auth-features">
       <div class="auth-feat"><div class="auth-feat-icon">🔥</div>Live cloud sync — all team members see the same data instantly</div>
       <div class="auth-feat"><div class="auth-feat-icon">🏢</div>3 companies pre-loaded — separate data per legal entity</div>
-      <div class="auth-feat"><div class="auth-feat-icon">🔐</div>Secure Firebase Auth — industry-standard login</div>
-      <div class="auth-feat"><div class="auth-feat-icon">📊</div>Real-time dashboard, summaries &amp; CSV export</div>
+      <div class="auth-feat"><div class="auth-feat-icon">📊</div>Depreciation register, bucketing &amp; asset status tracking</div>
+      <div class="auth-feat"><div class="auth-feat-icon">📥</div>Bulk CSV import with duplicate detection</div>
     </div>
   </div>
   <div class="auth-right">
     <div class="auth-box">
       <div class="auth-tabs">
-        <button class="auth-tab active" onclick="showAuthPanel('login')">Sign In</button>
-        <button class="auth-tab" onclick="showAuthPanel('register')">Register</button>
+        <button class="auth-tab active" onclick="showAuthPanel('login',event)">Sign In</button>
+        <button class="auth-tab" onclick="showAuthPanel('register',event)">Register</button>
       </div>
-      <!-- LOGIN -->
       <div class="auth-panel active" id="loginPanel">
         <h2 class="auth-form-title">Welcome back</h2>
         <p class="auth-form-sub">Sign in to access your company's assets</p>
         <div class="error-msg" id="loginError"></div>
-        <div class="field"><label>Email Address</label><input type="email" id="loginEmail" placeholder="you@acefone.com"></div>
+        <div class="field"><label>Email Address</label><input type="email" id="loginEmail" placeholder="you@servetel.in"></div>
         <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()"></div>
         <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Sign In →</button>
+        <div style="text-align:center;margin-top:14px">
+          <a href="#" onclick="doForgotPassword()" style="font-size:13px;color:var(--accent);font-weight:600">Forgot password?</a>
+        </div>
         <div class="divider">or</div>
-        <p style="text-align:center;font-size:13px;color:var(--ink2)">New user? <a href="#" onclick="showAuthPanel('register')" style="color:var(--accent);font-weight:600">Register here</a></p>
+        <p style="text-align:center;font-size:13px;color:var(--ink2)">New user? <a href="#" onclick="showAuthPanel('register',event)" style="color:var(--accent);font-weight:600">Register here</a></p>
       </div>
-      <!-- REGISTER -->
       <div class="auth-panel" id="registerPanel">
         <h2 class="auth-form-title">Create Account</h2>
         <p class="auth-form-sub">Register and join your company</p>
         <div class="error-msg" id="registerError"></div>
         <div class="field"><label>Full Name</label><input type="text" id="regName" placeholder="Your full name"></div>
-        <div class="field"><label>Email Address</label><input type="email" id="regEmail" placeholder="you@acefone.com"></div>
+        <div class="field"><label>Email Address</label><input type="email" id="regEmail" placeholder="you@servetel.in"></div>
         <div class="field"><label>Password (min 6 chars)</label><input type="password" id="regPass" placeholder="Create a password"></div>
         <div class="field"><label>Confirm Password</label><input type="password" id="regPass2" placeholder="Repeat password"></div>
         <div class="field">
@@ -264,17 +271,14 @@ tr:hover td{background:var(--bg)}
             <option value="srv002">Servetel Infocomm Pvt Ltd</option>
           </select>
         </div>
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--ink2);margin-bottom:16px;line-height:1.6">
-          💡 You can join additional companies later using their company code.
-        </div>
         <button class="btn btn-primary" id="registerBtn" onclick="doRegister()">Create Account →</button>
-        <p style="margin-top:14px;text-align:center;font-size:13px;color:var(--ink2)">Already registered? <a href="#" onclick="showAuthPanel('login')" style="color:var(--accent);font-weight:600">Sign in</a></p>
+        <p style="margin-top:14px;text-align:center;font-size:13px;color:var(--ink2)">Already registered? <a href="#" onclick="showAuthPanel('login',event)" style="color:var(--accent);font-weight:600">Sign in</a></p>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══ COMPANY SELECT ══ -->
+<!-- COMPANY SELECT -->
 <div id="companyScreen" style="display:none">
   <div class="company-select-page">
     <div class="company-select-box">
@@ -295,13 +299,13 @@ tr:hover td{background:var(--bg)}
   </div>
 </div>
 
-<!-- ══ MAIN APP ══ -->
+<!-- MAIN APP -->
 <div id="appScreen">
   <nav class="navbar">
     <div style="display:flex;align-items:center;gap:16px">
       <div class="nav-brand">
         <div class="nav-brand-icon">📋</div>
-        <div class="nav-brand-name">AssetVerify</div>
+        <div class="nav-brand-name">AssetVerify <span style="font-size:10px;background:var(--accent);color:#fff;padding:2px 6px;border-radius:4px;vertical-align:middle">v2</span></div>
       </div>
       <div class="nav-company-pill" id="navCompanyPill">🏢 Company</div>
     </div>
@@ -321,17 +325,25 @@ tr:hover td{background:var(--bg)}
         <button class="sidebar-item active" onclick="showPage('dashboard')"><span class="s-icon">🏠</span> Dashboard</button>
         <button class="sidebar-item" onclick="showPage('addAsset')"><span class="s-icon">➕</span> Add Asset</button>
         <button class="sidebar-item" onclick="showPage('records')"><span class="s-icon">📄</span> All Records <span class="sidebar-badge" id="sidebarCount">0</span></button>
+        <button class="sidebar-item" onclick="showPage('buckets')"><span class="s-icon">🗂️</span> Asset Buckets</button>
         <button class="sidebar-item" onclick="showPage('summary')"><span class="s-icon">📊</span> Summary</button>
+        <button class="sidebar-item" onclick="showPage('depreciation')"><span class="s-icon">📉</span> Depreciation</button>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Tools</div>
         <button class="sidebar-item" onclick="showPage('import')"><span class="s-icon">📥</span> Import CSV</button>
+        <button class="sidebar-item" onclick="exportCSV()"><span class="s-icon">⬇️</span> Export CSV</button>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-label">Account</div>
         <button class="sidebar-item" onclick="switchCompany()"><span class="s-icon">🏢</span> Switch Company</button>
         <button class="sidebar-item" onclick="showPage('team')"><span class="s-icon">👥</span> Team Members</button>
+        <button class="sidebar-item" id="adminSidebarBtn" style="display:none" onclick="showPage('admin')"><span class="s-icon">🔐</span> Admin Panel</button>
       </div>
     </aside>
 
     <main class="main">
+
       <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
         <div class="page-header">
@@ -345,11 +357,13 @@ tr:hover td{background:var(--bg)}
           <div class="stat-card"><div class="stat-label">Total Assets</div><div class="stat-value" id="dashTotalAssets">—</div><div class="stat-icon">📦</div></div>
           <div class="stat-card amber"><div class="stat-label">Total Quantity</div><div class="stat-value" id="dashTotalQty">—</div><div class="stat-icon">🔢</div></div>
           <div class="stat-card green"><div class="stat-label">Total Value</div><div class="stat-value" id="dashTotalVal">—</div><div class="stat-icon">💰</div></div>
-          <div class="stat-card blue"><div class="stat-label">Departments</div><div class="stat-value" id="dashDepts">—</div><div class="stat-icon">🏗</div></div>
+          <div class="stat-card blue"><div class="stat-label">Active Assets</div><div class="stat-value" id="dashActive">—</div><div class="stat-icon">✅</div></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-          <div class="card"><div class="card-head"><h3>By Condition</h3></div><div class="card-body" id="dashCondition"><div style="color:var(--ink3);font-size:13px">Loading...</div></div></div>
-          <div class="card"><div class="card-head"><h3>Top Departments by Value</h3></div><div class="card-body" id="dashDeptSummary"><div style="color:var(--ink3);font-size:13px">Loading...</div></div></div>
+          <div class="card"><div class="card-head"><h3>By Status</h3></div><div class="card-body" id="dashStatus"></div></div>
+          <div class="card"><div class="card-head"><h3>By Condition</h3></div><div class="card-body" id="dashCondition"></div></div>
+          <div class="card"><div class="card-head"><h3>Top Departments by Value</h3></div><div class="card-body" id="dashDeptSummary"></div></div>
+          <div class="card"><div class="card-head"><h3>By Asset Bucket</h3></div><div class="card-body" id="dashBuckets"></div></div>
         </div>
       </div>
 
@@ -362,8 +376,37 @@ tr:hover td{background:var(--bg)}
           <div class="card-head"><h3 id="formCardTitle">New Asset Entry</h3></div>
           <div class="card-body">
             <div class="form-grid">
+              <div class="field">
+                <label>Dept. Tag No</label>
+                <input type="text" id="fTag" placeholder="e.g. GGN1/LPT/079" oninput="checkDuplicate(this.value)">
+                <div class="dup-hint" id="dupHint">⚠️ This Tag No already exists in the system</div>
+              </div>
+              <div class="field"><label>Invoice No</label><input type="text" id="fInvoice" placeholder="e.g. ACE/24-25/020"></div>
+              <div class="field"><label>Asset Bucket</label>
+                <select id="fBucket">
+                  <option value="">Select bucket…</option>
+                  <option>Computers &amp; Servers</option>
+                  <option>Firewall &amp; Switches</option>
+                  <option>Office Furniture</option>
+                  <option>Electrical Equipment</option>
+                  <option>Vehicles</option>
+                  <option>Software License</option>
+                  <option>Servers Accessories</option>
+                  <option>Other</option>
+                </select>
+              </div>
               <div class="field"><label>Vendor Name *</label><input type="text" id="fVendor" list="vendorList" placeholder="e.g. Dell India Pvt Ltd"><datalist id="vendorList"></datalist></div>
-              <div class="field"><label>Department *</label><input type="text" id="fDept" list="deptList" placeholder="e.g. Finance"><datalist id="deptList"></datalist></div>
+              <div class="field"><label>Department *</label><input type="text" id="fDept" list="deptList" placeholder="e.g. IT"><datalist id="deptList"></datalist></div>
+              <div class="field"><label>Asset Status</label>
+                <select id="fStatus">
+                  <option value="Active">Active</option>
+                  <option value="Sold">Sold</option>
+                  <option value="Scrapped">Scrapped</option>
+                  <option value="Discarded">Discarded</option>
+                </select>
+              </div>
+              <div class="field span2"><label>Asset Description *</label><input type="text" id="fDesc" placeholder="e.g. Dell Laptop Inspiron 15 — 16GB RAM, 512GB SSD"></div>
+              <div class="field"><label>Serial Number</label><input type="text" id="fSerial" placeholder="e.g. SN/DL/0051"></div>
               <div class="field"><label>Asset Category</label>
                 <select id="fCategory">
                   <option value="">Select…</option>
@@ -371,15 +414,14 @@ tr:hover td{background:var(--bg)}
                   <option>Electrical Equipment</option><option>Vehicle</option><option>Software License</option><option>Other</option>
                 </select>
               </div>
-              <div class="field"><label>Tag No. *</label><input type="text" id="fTag" placeholder="e.g. TAG-2024-001"></div>
-              <div class="field"><label>Serial Number</label><input type="text" id="fSerial" placeholder="e.g. SN/DL/0051"></div>
               <div class="field"><label>Condition *</label>
                 <select id="fCondition"><option>Good</option><option>Fair</option><option>Poor</option><option>Damaged</option><option>Missing</option></select>
               </div>
-              <div class="field span2"><label>Asset Description *</label><input type="text" id="fDesc" placeholder="e.g. Dell Laptop Inspiron 15 — 16GB RAM, 512GB SSD"></div>
               <div class="field"><label>Quantity *</label><input type="number" id="fQty" min="1" value="1"></div>
               <div class="field"><label>Unit Amount (₹) *</label><input type="number" id="fAmount" min="0" placeholder="e.g. 55000"></div>
               <div class="field"><label>Location / Floor</label><input type="text" id="fLocation" placeholder="e.g. 2nd Floor, Room 201"></div>
+              <div class="field"><label>Invoice Date *</label><input type="date" id="fInvDate"></div>
+              <div class="field"><label>Put to Use Date</label><input type="date" id="fPutToUseDate"></div>
               <div class="field"><label>Verification Date</label><input type="date" id="fDate"></div>
               <div class="field span3"><label>Remarks</label><textarea id="fRemarks" placeholder="Any additional observations…"></textarea></div>
             </div>
@@ -396,7 +438,18 @@ tr:hover td{background:var(--bg)}
       <div class="page" id="page-records">
         <div class="page-header">
           <div><div class="page-title">Asset Records</div><div class="page-sub" id="recordsSub">All verified assets</div></div>
-          <button class="btn btn-ghost btn-sm" onclick="exportCSV()" style="width:auto">⬇ Export CSV</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-danger btn-sm" id="bulkDeleteBtn" onclick="bulkDelete()" style="display:none;width:auto">🗑 Delete Selected (<span id="bulkCount">0</span>)</button>
+            <button class="btn btn-ghost btn-sm" onclick="exportCSV()" style="width:auto">⬇ Export CSV</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="flex:1;position:relative">
+            <input type="text" id="quickSearch" placeholder="🔍  Quick search — type anything: tag no, vendor, description, serial, location…" oninput="renderTable()" style="width:100%;padding:11px 16px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .18s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;white-space:nowrap">
+            <input type="checkbox" id="selectAllChk" onchange="toggleSelectAll(this.checked)" style="width:16px;height:16px;cursor:pointer"> Select All
+          </label>
         </div>
         <div class="table-toolbar">
           <div class="field"><label>Search</label><input type="text" id="searchQ" placeholder="Tag, serial, description…" oninput="renderTable()"></div>
@@ -405,21 +458,38 @@ tr:hover td{background:var(--bg)}
           <div class="field"><label>Condition</label>
             <select id="filterC" onchange="renderTable()"><option value="">All</option><option>Good</option><option>Fair</option><option>Poor</option><option>Damaged</option><option>Missing</option></select>
           </div>
+          <div class="field"><label>Status</label>
+            <select id="filterS" onchange="renderTable()"><option value="">All</option><option>Active</option><option>Sold</option><option>Scrapped</option><option>Discarded</option></select>
+          </div>
+          <div class="field"><label>Bucket</label><select id="filterB" onchange="renderTable()"><option value="">All Buckets</option></select></div>
         </div>
         <div class="table-wrap">
           <table><thead><tr>
-            <th onclick="sortBy('tagNo')">Tag No.</th>
+            <th style="width:36px"><input type="checkbox" id="headerChk" onchange="toggleSelectAll(this.checked)" style="cursor:pointer"></th>
+            <th onclick="sortBy('tagNo')">Dept Tag No</th>
+            <th onclick="sortBy('invoiceNo')">Invoice No</th>
+            <th onclick="sortBy('invoiceDate')">Invoice Date</th>
             <th onclick="sortBy('vendor')">Vendor</th>
-            <th onclick="sortBy('department')">Department</th>
+            <th onclick="sortBy('department')">Dept</th>
             <th onclick="sortBy('description')">Description</th>
-            <th onclick="sortBy('serialNo')">Serial No.</th>
+            <th onclick="sortBy('serialNo')">Serial No</th>
             <th onclick="sortBy('quantity')">Qty</th>
             <th onclick="sortBy('amount')">Unit ₹</th>
             <th onclick="sortBy('total')">Total ₹</th>
+            <th onclick="sortBy('status')">Status</th>
             <th onclick="sortBy('condition')">Condition</th>
             <th>Actions</th>
           </tr></thead><tbody id="tableBody"></tbody></table>
         </div>
+      </div>
+
+      <!-- ASSET BUCKETS -->
+      <div class="page" id="page-buckets">
+        <div class="page-header">
+          <div><div class="page-title">Asset Buckets</div><div class="page-sub">Assets grouped by bucket / category</div></div>
+        </div>
+        <div class="bucket-tabs" id="bucketTabs"></div>
+        <div id="bucketContent"></div>
       </div>
 
       <!-- SUMMARY -->
@@ -433,8 +503,89 @@ tr:hover td{background:var(--bg)}
         <div class="summary-grid">
           <div class="card"><div class="card-head"><h3>By Vendor</h3></div><div class="card-body" id="byVendor"></div></div>
           <div class="card"><div class="card-head"><h3>By Department</h3></div><div class="card-body" id="byDept"></div></div>
+          <div class="card"><div class="card-head"><h3>By Status</h3></div><div class="card-body" id="byStatus"></div></div>
+          <div class="card"><div class="card-head"><h3>By Asset Bucket</h3></div><div class="card-body" id="byBucket"></div></div>
           <div class="card"><div class="card-head"><h3>By Condition</h3></div><div class="card-body" id="byCond"></div></div>
           <div class="card"><div class="card-head"><h3>By Category</h3></div><div class="card-body" id="byCat"></div></div>
+        </div>
+      </div>
+
+      <!-- DEPRECIATION -->
+      <div class="page" id="page-depreciation">
+        <div class="page-header">
+          <div><div class="page-title">Depreciation Register</div><div class="page-sub">As per Companies Act &amp; Income Tax Act</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" id="depActBtn" onclick="switchDepAct('companies')" style="width:auto">Companies Act</button>
+            <button class="btn btn-primary btn-sm" id="depItBtn" onclick="switchDepAct('it')" style="width:auto">IT Act</button>
+          </div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--ink2);margin-bottom:20px;line-height:1.7">
+          <b>Companies Act:</b> SLM (Straight Line Method) based on useful life. &nbsp;|&nbsp; <b>IT Act:</b> WDV (Written Down Value) method at prescribed block rates.
+          &nbsp;|&nbsp; Put-to-use date used for pro-rata calculation.
+        </div>
+        <div class="table-wrap">
+          <table class="dep-table"><thead><tr>
+            <th>Dept Tag No</th><th>Description</th><th>Bucket</th><th>Put to Use</th>
+            <th>Cost (₹)</th><th>Rate %</th><th>Dep. FY (₹)</th><th>WDV / Net (₹)</th>
+          </tr></thead><tbody id="depTableBody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- IMPORT -->
+      <div class="page" id="page-import">
+        <div class="page-header">
+          <div><div class="page-title">Import Assets</div><div class="page-sub">Bulk upload from CSV — duplicates are detected automatically</div></div>
+        </div>
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-head"><h3>📋 Required CSV Columns</h3></div>
+          <div class="card-body">
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:var(--ink);line-height:2">
+              Tag No, Invoice No, Vendor, Department, Category, Description, Serial No, Quantity, Unit Amount, Total Amount, Condition, Location, Verification Date, Remarks
+            </div>
+            <p style="font-size:12px;color:var(--ink3);margin-top:10px">💡 Condition: Good / Fair / Poor / Damaged / Missing. Dates: YYYY-MM-DD. Duplicates (same Tag No) will be flagged before import.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>📤 Upload CSV File</h3></div>
+          <div class="card-body">
+            <div id="importDropZone" onclick="document.getElementById('csvFileInput').click()" style="border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--accent-lt)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='transparent'">
+              <div style="font-size:48px;margin-bottom:12px">📂</div>
+              <div style="font-size:16px;font-weight:700;margin-bottom:6px">Click to select CSV file</div>
+              <div style="font-size:13px;color:var(--ink2)">or drag and drop your file here</div>
+              <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleCSVFile(event)">
+            </div>
+            <div id="importPreview" style="display:none;margin-top:20px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                <div>
+                  <div style="font-weight:700;font-size:15px" id="importFileName"></div>
+                  <div style="font-size:13px;color:var(--ink2)" id="importStats"></div>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <button class="btn btn-ghost btn-sm" onclick="clearImport()">✕ Clear</button>
+                  <button class="btn btn-primary btn-sm" id="importBtn" onclick="runImport()" style="width:auto">🚀 Import to Firebase</button>
+                </div>
+              </div>
+              <div id="dupWarning" style="display:none;background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px 14px;font-size:13px;color:#f57f17;margin-bottom:12px"></div>
+              <div class="table-wrap" style="max-height:320px;overflow-y:auto">
+                <table><thead><tr>
+                  <th>Tag No</th><th>Invoice No</th><th>Vendor</th><th>Dept</th><th>Description</th>
+                  <th>Qty</th><th>Unit ₹</th><th>Total ₹</th><th>Status</th>
+                </tr></thead><tbody id="importTableBody"></tbody></table>
+              </div>
+            </div>
+            <div id="importProgress" style="display:none;margin-top:20px">
+              <div style="font-weight:600;font-size:14px;margin-bottom:8px" id="importProgressText">Importing...</div>
+              <div style="background:var(--border);border-radius:20px;height:8px;overflow:hidden">
+                <div id="importProgressBar" style="background:var(--accent);height:100%;width:0%;transition:width .3s;border-radius:20px"></div>
+              </div>
+              <div style="font-size:12px;color:var(--ink2);margin-top:6px" id="importProgressCount"></div>
+            </div>
+            <div id="importSuccess" style="display:none;margin-top:20px;background:var(--success-lt);border:1px solid #b7dfc8;border-radius:12px;padding:20px;text-align:center">
+              <div style="font-size:36px;margin-bottom:8px">✅</div>
+              <div style="font-weight:700;font-size:16px;color:var(--success)" id="importSuccessText"></div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="showPage('records')">View All Records →</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -458,64 +609,27 @@ tr:hover td{background:var(--bg)}
       </div>
 
 
-      <!-- IMPORT PAGE -->
-      <div class="page" id="page-import">
+      <!-- ADMIN PAGE -->
+      <div class="page" id="page-admin">
         <div class="page-header">
-          <div><div class="page-title">Import Assets</div><div class="page-sub">Bulk upload assets from a CSV file into this company</div></div>
+          <div><div class="page-title">🔐 Admin Panel</div><div class="page-sub">Manage user permissions across all companies</div></div>
         </div>
         <div class="card" style="margin-bottom:20px">
-          <div class="card-head"><h3>📋 Required CSV Columns</h3></div>
-          <div class="card-body">
-            <p style="font-size:13px;color:var(--ink2);margin-bottom:12px">Your CSV must have these exact column headers (case-sensitive):</p>
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:var(--ink);line-height:2">
-              Tag No, Vendor, Department, Category, Description, Serial No, Quantity, Unit Amount, Total Amount, Condition, Location, Verification Date, Remarks
-            </div>
-            <p style="font-size:12px;color:var(--ink3);margin-top:10px">💡 Condition must be one of: Good, Fair, Poor, Damaged, Missing. Dates should be YYYY-MM-DD format.</p>
+          <div class="card-head"><h3>Delete Rights Management</h3><span style="font-size:12px;color:var(--ink2)">Control who can delete assets</span></div>
+          <div class="card-body" id="adminUserList">
+            <div style="color:var(--ink3);font-size:13px">Loading users...</div>
           </div>
         </div>
         <div class="card">
-          <div class="card-head"><h3>📤 Upload CSV File</h3></div>
+          <div class="card-head"><h3>System Info</h3></div>
           <div class="card-body">
-            <div id="importDropZone" onclick="document.getElementById('csvFileInput').click()" style="border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--accent-lt)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='transparent'">
-              <div style="font-size:48px;margin-bottom:12px">📂</div>
-              <div style="font-size:16px;font-weight:700;margin-bottom:6px">Click to select CSV file</div>
-              <div style="font-size:13px;color:var(--ink2)">or drag and drop your file here</div>
-              <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleCSVFile(event)">
-            </div>
-            <div id="importPreview" style="display:none;margin-top:20px">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-                <div>
-                  <div style="font-weight:700;font-size:15px" id="importFileName"></div>
-                  <div style="font-size:13px;color:var(--ink2)" id="importStats"></div>
-                </div>
-                <div style="display:flex;gap:8px">
-                  <button class="btn btn-ghost btn-sm" onclick="clearImport()">✕ Clear</button>
-                  <button class="btn btn-primary btn-sm" id="importBtn" onclick="runImport()" style="width:auto">🚀 Import to Firebase</button>
-                </div>
-              </div>
-              <div class="table-wrap" style="max-height:320px;overflow-y:auto">
-                <table><thead><tr>
-                  <th>Tag No</th><th>Vendor</th><th>Dept</th><th>Description</th>
-                  <th>Qty</th><th>Unit ₹</th><th>Total ₹</th><th>Condition</th>
-                </tr></thead><tbody id="importTableBody"></tbody></table>
-              </div>
-            </div>
-            <div id="importProgress" style="display:none;margin-top:20px">
-              <div style="font-weight:600;font-size:14px;margin-bottom:8px" id="importProgressText">Importing...</div>
-              <div style="background:var(--border);border-radius:20px;height:8px;overflow:hidden">
-                <div id="importProgressBar" style="background:var(--accent);height:100%;width:0%;transition:width .3s;border-radius:20px"></div>
-              </div>
-              <div style="font-size:12px;color:var(--ink2);margin-top:6px" id="importProgressCount"></div>
-            </div>
-            <div id="importSuccess" style="display:none;margin-top:20px;background:var(--success-lt);border:1px solid #b7dfc8;border-radius:12px;padding:20px;text-align:center">
-              <div style="font-size:36px;margin-bottom:8px">✅</div>
-              <div style="font-weight:700;font-size:16px;color:var(--success)" id="importSuccessText"></div>
-              <div style="font-size:13px;color:var(--ink2);margin-top:4px">All assets are now live in Firebase</div>
-              <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="showPage('records')">View All Records →</button>
-            </div>
+            <div class="summary-row"><span>Admin Account</span><span class="summary-val" style="font-size:13px">sumit.bhatnagar@servetel.co.in</span></div>
+            <div class="summary-row"><span>Total Users</span><span class="summary-val" id="adminTotalUsers">—</span></div>
+            <div class="summary-row"><span>Total Assets (all companies)</span><span class="summary-val" id="adminTotalAssets">—</span></div>
           </div>
         </div>
       </div>
+
     </main>
   </div>
 </div>
@@ -541,47 +655,59 @@ tr:hover td{background:var(--bg)}
 
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- ════════════════════════════════════════════
-     FIREBASE SDK
-════════════════════════════════════════════ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-         signOut, onAuthStateChanged, updateProfile }
+         signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion,
          collection, addDoc, query, where, onSnapshot, deleteDoc }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ══ COMPANIES MASTER LIST (always in Firestore) ══
+// ── ADMIN CONFIG ──
+const ADMIN_EMAIL = 'sumit.bhatnagar@servetel.co.in';
+
 const COMPANIES = [
   { id:'ace001', name:'Acefone Software Pvt Ltd',        industry:'IT / Software',      code:'ACE001', color:'#C84B2F' },
   { id:'srv001', name:'Servetel Communications Pvt Ltd', industry:'Telecommunications', code:'SRV001', color:'#2D6A4F' },
   { id:'srv002', name:'Servetel Infocomm Pvt Ltd',       industry:'Telecommunications', code:'SRV002', color:'#1A5276' },
 ];
 
-// ══ LOCAL FALLBACK (demo mode) ══
-const LOCAL = {
-  get: k => { try { return JSON.parse(localStorage.getItem(k)) } catch { return null } },
-  set: (k,v) => localStorage.setItem(k, JSON.stringify(v)),
-  del: k => localStorage.removeItem(k)
+// Depreciation rates
+const DEP_RATES_COMPANIES = {
+  'Computers & Servers': { rate: 33.33, life: 3 },
+  'Firewall & Switches': { rate: 33.33, life: 3 },
+  'Servers Accessories': { rate: 33.33, life: 3 },
+  'Office Furniture':    { rate: 10.00, life: 10 },
+  'Electrical Equipment':{ rate: 10.00, life: 10 },
+  'Vehicles':            { rate: 20.00, life: 5 },
+  'Software License':    { rate: 33.33, life: 3 },
+  'default':             { rate: 15.00, life: 7 },
+};
+const DEP_RATES_IT = {
+  'Computers & Servers': 40,
+  'Firewall & Switches': 40,
+  'Servers Accessories': 40,
+  'Office Furniture':    10,
+  'Electrical Equipment':15,
+  'Vehicles':            15,
+  'Software License':    25,
+  'default':             15,
 };
 
 let auth, db;
-let currentUser = null;
-let currentCompany = null;
-let localAssets = [];
-let assetsUnsubscribe = null;
-let editingId = null;
-let sortKey = 'tagNo', sortAsc = true;
+let currentUser = null, currentCompany = null;
+let localAssets = [], assetsUnsubscribe = null;
+let editingId = null, sortKey = 'tagNo', sortAsc = true;
+let currentDepAct = 'companies';
+let importData = [];
 
-// ══ INIT ══
-// ── Firebase Init ──
+// ── INIT ──
 try {
   const app = initializeApp(FIREBASE_CONFIG);
   auth = getAuth(app);
   db = getFirestore(app);
-  seedCompaniesInFirestore();
+  seedCompanies();
   onAuthStateChanged(auth, async user => {
     document.getElementById('loadingOverlay').style.display = 'none';
     if (user) {
@@ -595,7 +721,6 @@ try {
           document.getElementById('authScreen').style.display = 'grid';
         }
       } catch(e) {
-        console.error('Error loading user:', e);
         document.getElementById('authScreen').style.display = 'grid';
       }
     } else {
@@ -603,12 +728,11 @@ try {
     }
   });
 } catch(e) {
-  console.error('Firebase init error:', e);
   document.getElementById('loadingOverlay').style.display = 'none';
   document.getElementById('authScreen').style.display = 'grid';
 }
 
-async function seedCompaniesInFirestore() {
+async function seedCompanies() {
   for (const c of COMPANIES) {
     const ref = doc(db, 'companies', c.id);
     const snap = await getDoc(ref);
@@ -616,12 +740,12 @@ async function seedCompaniesInFirestore() {
   }
 }
 
-// ══ AUTH ══
-window.showAuthPanel = function(panel) {
+// ── AUTH ──
+window.showAuthPanel = function(panel, event) {
   document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
   document.getElementById(panel + 'Panel').classList.add('active');
-  event.target.classList.add('active');
+  if (event && event.target) event.target.classList.add('active');
 };
 
 window.doLogin = async function() {
@@ -643,6 +767,18 @@ window.doLogin = async function() {
   btn.disabled = false; btn.textContent = 'Sign In →';
 };
 
+window.doForgotPassword = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) { showError('loginError','Enter your email address above first.'); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    hideError('loginError');
+    toast('Password reset email sent to ' + email, 'success');
+  } catch(e) {
+    showError('loginError', 'Could not send reset email. Check the address and try again.');
+  }
+};
+
 window.doRegister = async function() {
   const name      = document.getElementById('regName').value.trim();
   const email     = document.getElementById('regEmail').value.trim();
@@ -651,7 +787,7 @@ window.doRegister = async function() {
   const companyId = document.getElementById('regCompany').value;
   if (!name||!email||!pass||!companyId) { showError('registerError','All fields are required.'); return; }
   if (pass.length < 6) { showError('registerError','Password must be at least 6 characters.'); return; }
-  if (pass !== pass2) { showError('registerError','Passwords do not match.'); return; }
+  if (pass !== pass2)  { showError('registerError','Passwords do not match.'); return; }
   const btn = document.getElementById('registerBtn');
   btn.disabled = true; btn.textContent = 'Creating account…';
   try {
@@ -664,8 +800,7 @@ window.doRegister = async function() {
     hideError('registerError');
     showCompanyScreen();
   } catch(e) {
-    showError('registerError', e.message.includes('email-already') || e.message.includes('Email exists')
-      ? 'An account with this email already exists.' : 'Registration failed: ' + e.message);
+    showError('registerError', e.message.includes('email-already') ? 'An account with this email already exists.' : 'Registration failed: ' + e.message);
   }
   btn.disabled = false; btn.textContent = 'Create Account →';
 };
@@ -679,7 +814,7 @@ window.doLogout = async function() {
   document.getElementById('authScreen').style.display = 'grid';
 };
 
-// ══ COMPANY SCREEN ══
+// ── COMPANY SCREEN ──
 function showCompanyScreen() {
   document.getElementById('authScreen').style.display = 'none';
   document.getElementById('appScreen').style.display = 'none';
@@ -691,34 +826,20 @@ function showCompanyScreen() {
 async function renderCompanyCards() {
   const container = document.getElementById('companyCards');
   container.innerHTML = '<div style="color:var(--ink3);font-size:13px;padding:16px">Loading companies...</div>';
-
-  // Re-fetch user from Firestore to get latest companies list
   let myIds = currentUser.companies || [];
   try {
-    const freshSnap = await getDoc(doc(db, 'users', currentUser.uid));
-    if (freshSnap.exists()) {
-      myIds = freshSnap.data().companies || [];
-      currentUser = { ...currentUser, companies: myIds };
-    }
-  } catch(e) { console.warn('Could not refresh user:', e); }
-
+    const snap = await getDoc(doc(db, 'users', currentUser.uid));
+    if (snap.exists()) { myIds = snap.data().companies || []; currentUser = { ...currentUser, companies: myIds }; }
+  } catch(e) {}
   const myCompanies = COMPANIES.filter(c => myIds.includes(c.id));
-
   if (!myCompanies.length) {
-    container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--ink2);font-size:14px">No companies yet. Use the button below to join one.</div>';
+    container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--ink2);font-size:14px">No companies yet. Use a company code to join one.</div>';
     return;
   }
-
-  // Get asset counts from Firestore
-  const rows = myCompanies.map(c => ({ ...c, count: 0 }));
-
-  container.innerHTML = rows.map(c => `
+  container.innerHTML = myCompanies.map(c => `
     <div class="company-card" onclick="enterCompany('${c.id}')">
-      <div class="company-avatar" style="background:${c.color}">${c.name.charAt(0).toUpperCase()}</div>
-      <div class="company-info">
-        <h4>${c.name}</h4>
-        <p>${c.industry}</p>
-      </div>
+      <div class="company-avatar" style="background:${c.color}">${c.name.charAt(0)}</div>
+      <div class="company-info"><h4>${c.name}</h4><p>${c.industry}</p></div>
       <div class="company-arrow">›</div>
     </div>`).join('');
 }
@@ -738,7 +859,7 @@ window.switchCompany = function() {
   showCompanyScreen();
 };
 
-// ══ APP INIT ══
+// ── APP INIT ──
 function initApp() {
   document.getElementById('navCompanyPill').textContent = '🏢 ' + currentCompany.name;
   document.getElementById('navUserName').textContent = currentUser.name;
@@ -746,121 +867,149 @@ function initApp() {
   document.getElementById('dashTitle').textContent = currentCompany.name;
   document.getElementById('companyCode').textContent = currentCompany.code;
   document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+  // Show admin button only for admin
+  const adminBtn = document.getElementById('adminSidebarBtn');
+  if (adminBtn) adminBtn.style.display = currentUser.email === ADMIN_EMAIL ? 'flex' : 'none';
   setSyncDot('syncing');
   subscribeAssets();
   showPage('dashboard');
 }
 
-// ══ REAL-TIME SUBSCRIPTION ══
+// ── REAL-TIME SUBSCRIPTION ──
 function subscribeAssets() {
   if (assetsUnsubscribe) assetsUnsubscribe();
   const q = query(collection(db, 'assets'), where('companyId','==', currentCompany.id));
   assetsUnsubscribe = onSnapshot(q, snap => {
     localAssets = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     setSyncDot('synced');
-    renderDashboard();
-    updateSidebarCount();
-    if (document.getElementById('page-records').classList.contains('active')) { updateFilters(); renderTable(); }
-    if (document.getElementById('page-summary').classList.contains('active')) renderSummary();
+    renderDashboard(); updateSidebarCount();
+    if (document.getElementById('page-records').classList.contains('active'))    { updateFilters(); renderTable(); }
+    if (document.getElementById('page-summary').classList.contains('active'))    renderSummary();
+    if (document.getElementById('page-depreciation').classList.contains('active')) renderDepreciation();
+    if (document.getElementById('page-buckets').classList.contains('active'))    renderBuckets();
   }, () => setSyncDot('error'));
 }
 
 function setSyncDot(state) {
   const dot = document.getElementById('syncDot');
   dot.className = 'sync-dot';
-  if (state === 'synced') { dot.classList.add('synced'); dot.title = 'Synced with cloud'; }
-  else if (state === 'syncing') { dot.classList.add('syncing'); dot.title = 'Syncing…'; }
-  else { dot.style.background='var(--danger)'; dot.title = 'Sync error'; }
+  if (state==='synced')  { dot.classList.add('synced');  dot.title='Synced'; }
+  else if (state==='syncing') { dot.classList.add('syncing'); dot.title='Syncing…'; }
+  else { dot.style.background='var(--danger)'; dot.title='Sync error'; }
 }
 
-// ══ CRUD ══
+// ── DUPLICATE CHECK ──
+window.checkDuplicate = function(val) {
+  if (!val || editingId) return;
+  const hint = document.getElementById('dupHint');
+  const input = document.getElementById('fTag');
+  const exists = localAssets.some(a => a.tagNo && a.tagNo.toLowerCase() === val.toLowerCase() && a.id !== editingId);
+  hint.classList.toggle('show', exists);
+  input.classList.toggle('dup-warn', exists);
+};
+
+// ── CRUD ──
 window.saveAsset = async function() {
   const vendor = document.getElementById('fVendor').value.trim();
   const dept   = document.getElementById('fDept').value.trim();
-  const tag    = document.getElementById('fTag').value.trim();
   const desc   = document.getElementById('fDesc').value.trim();
   const qty    = parseInt(document.getElementById('fQty').value) || 0;
   const amount = parseFloat(document.getElementById('fAmount').value) || 0;
-  if (!vendor||!dept||!tag||!desc||qty<1) { toast('Fill all required (*) fields','error'); return; }
+  if (!vendor||!dept||!desc||qty<1) { toast('Fill all required (*) fields','error'); return; }
   const asset = {
-    companyId: currentCompany.id, vendor, department: dept, tagNo: tag, description: desc,
-    category: document.getElementById('fCategory').value,
-    serialNo: document.getElementById('fSerial').value.trim(),
-    quantity: qty, amount, total: qty * amount,
-    location: document.getElementById('fLocation').value.trim(),
-    condition: document.getElementById('fCondition').value,
-    verDate: document.getElementById('fDate').value,
-    remarks: document.getElementById('fRemarks').value.trim(),
-    updatedBy: currentUser.name,
-    updatedAt: new Date().toISOString()
+    companyId:    currentCompany.id,
+    tagNo:        document.getElementById('fTag').value.trim(),
+    invoiceNo:    document.getElementById('fInvoice').value.trim(),
+    vendor, department: dept, description: desc,
+    bucket:       document.getElementById('fBucket').value,
+    category:     document.getElementById('fCategory').value,
+    serialNo:     document.getElementById('fSerial').value.trim(),
+    quantity:     qty, amount, total: qty * amount,
+    status:       document.getElementById('fStatus').value,
+    condition:    document.getElementById('fCondition').value,
+    location:     document.getElementById('fLocation').value.trim(),
+    invoiceDate:  document.getElementById('fInvDate').value,
+    putToUseDate: document.getElementById('fPutToUseDate').value,
+    verDate:      document.getElementById('fDate').value,
+    remarks:      document.getElementById('fRemarks').value.trim(),
+    updatedBy:    currentUser.name,
+    updatedAt:    new Date().toISOString()
   };
   setSyncDot('syncing');
   try {
     if (editingId) { await updateDoc(doc(db,'assets',editingId), asset); }
-    else { await addDoc(collection(db,'assets'), asset); }
+    else           { await addDoc(collection(db,'assets'), asset); }
     toast(editingId ? 'Asset updated!' : 'Asset saved!', 'success');
-    editingId = null;
-    clearForm();
-    updateDataLists();
+    editingId = null; clearForm(); updateDataLists();
   } catch(e) { toast('Save failed: '+e.message,'error'); setSyncDot('error'); }
 };
 
 window.editAsset = function(id) {
   const a = localAssets.find(x=>x.id===id); if(!a) return;
   editingId = id;
-  document.getElementById('fVendor').value = a.vendor||'';
-  document.getElementById('fDept').value = a.department||'';
-  document.getElementById('fTag').value = a.tagNo||'';
-  document.getElementById('fDesc').value = a.description||'';
-  document.getElementById('fSerial').value = a.serialNo||'';
-  document.getElementById('fCategory').value = a.category||'';
-  document.getElementById('fQty').value = a.quantity;
-  document.getElementById('fAmount').value = a.amount;
-  document.getElementById('fLocation').value = a.location||'';
-  document.getElementById('fCondition').value = a.condition||'Good';
-  document.getElementById('fDate').value = a.verDate||'';
-  document.getElementById('fRemarks').value = a.remarks||'';
-  document.getElementById('saveBtn').textContent = '💾 Update Asset';
+  document.getElementById('fTag').value         = a.tagNo||'';
+  document.getElementById('fInvoice').value     = a.invoiceNo||'';
+  document.getElementById('fVendor').value      = a.vendor||'';
+  document.getElementById('fDept').value        = a.department||'';
+  document.getElementById('fDesc').value        = a.description||'';
+  document.getElementById('fSerial').value      = a.serialNo||'';
+  document.getElementById('fBucket').value      = a.bucket||'';
+  document.getElementById('fCategory').value    = a.category||'';
+  document.getElementById('fQty').value         = a.quantity;
+  document.getElementById('fAmount').value      = a.amount;
+  document.getElementById('fLocation').value    = a.location||'';
+  document.getElementById('fStatus').value      = a.status||'Active';
+  document.getElementById('fCondition').value   = a.condition||'Good';
+  document.getElementById('fInvDate').value     = a.invoiceDate||'';
+  document.getElementById('fPutToUseDate').value= a.putToUseDate||'';
+  document.getElementById('fDate').value        = a.verDate||'';
+  document.getElementById('fRemarks').value     = a.remarks||'';
+  document.getElementById('saveBtn').textContent       = '💾 Update Asset';
   document.getElementById('cancelEditBtn').style.display = 'inline-flex';
-  document.getElementById('addAssetTitle').textContent = 'Edit Asset';
-  document.getElementById('formCardTitle').textContent = 'Edit Asset Details';
+  document.getElementById('addAssetTitle').textContent  = 'Edit Asset';
+  document.getElementById('formCardTitle').textContent  = 'Edit Asset Details';
   showPage('addAsset'); window.scrollTo({top:0,behavior:'smooth'});
 };
 
 window.deleteAsset = async function(id) {
-  if (!confirm('Delete this asset record? This cannot be undone.')) return;
+  const canDelete = currentUser.email === ADMIN_EMAIL || currentUser.canDelete === true;
+  if (!canDelete) { toast('You do not have delete rights. Contact admin.', 'error'); return; }
+  if (!confirm('Delete this asset? This cannot be undone.')) return;
   setSyncDot('syncing');
-  try {
-    await deleteDoc(doc(db,'assets',id));
-    toast('Asset deleted','warning');
-  } catch(e) { toast('Delete failed','error'); setSyncDot('error'); }
+  try { await deleteDoc(doc(db,'assets',id)); toast('Asset deleted','warning'); }
+  catch(e) { toast('Delete failed','error'); setSyncDot('error'); }
 };
 
 window.clearForm = function() {
-  ['fVendor','fDept','fTag','fDesc','fSerial','fLocation','fRemarks'].forEach(id=>document.getElementById(id).value='');
+  ['fTag','fInvoice','fVendor','fDept','fDesc','fSerial','fLocation','fRemarks','fInvDate','fPutToUseDate'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fBucket').value='';
   document.getElementById('fCategory').value='';
+  document.getElementById('fStatus').value='Active';
   document.getElementById('fCondition').value='Good';
   document.getElementById('fQty').value=1;
   document.getElementById('fAmount').value='';
   document.getElementById('fDate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('dupHint').classList.remove('show');
+  document.getElementById('fTag').classList.remove('dup-warn');
   editingId=null;
   document.getElementById('saveBtn').textContent='💾 Save Asset';
   document.getElementById('cancelEditBtn').style.display='none';
   document.getElementById('addAssetTitle').textContent='Add Asset';
   document.getElementById('formCardTitle').textContent='New Asset Entry';
 };
-
 window.cancelEdit = function() { editingId=null; clearForm(); };
 
-// ══ TABLE ══
+// ── TABLE ──
 function getFiltered() {
-  const q=(document.getElementById('searchQ')?.value||'').toLowerCase();
+  const q=(document.getElementById('searchQ')?.value||document.getElementById('quickSearch')?.value||'').toLowerCase();
   const fv=document.getElementById('filterV')?.value||'';
   const fd=document.getElementById('filterD')?.value||'';
   const fc=document.getElementById('filterC')?.value||'';
+  const fs=document.getElementById('filterS')?.value||'';
+  const fb=document.getElementById('filterB')?.value||'';
   return localAssets.filter(a=>{
-    const m=!q||[a.tagNo,a.serialNo,a.description,a.vendor,a.department,a.location].join(' ').toLowerCase().includes(q);
-    return m&&(!fv||a.vendor===fv)&&(!fd||a.department===fd)&&(!fc||a.condition===fc);
+    const m=!q||[a.tagNo,a.invoiceNo,a.serialNo,a.description,a.vendor,a.department,a.location,a.remarks,a.category,a.bucket].join(' ').toLowerCase().includes(q);
+    return m&&(!fv||a.vendor===fv)&&(!fd||a.department===fd)&&(!fc||a.condition===fc)&&(!fs||a.status===fs)&&(!fb||a.bucket===fb);
   });
 }
 
@@ -876,93 +1025,201 @@ function renderTable() {
   });
   document.getElementById('recordsSub').textContent=rows.length+' assets found';
   const tbody=document.getElementById('tableBody');
+  const canDelete = currentUser && (currentUser.email === ADMIN_EMAIL || currentUser.canDelete === true);
   if(!rows.length){
-    tbody.innerHTML=`<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">No assets found</div><div class="empty-desc">Add assets or adjust filters</div></div></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="14"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">No assets found</div></div></td></tr>`;
     return;
   }
-  tbody.innerHTML=rows.map(a=>`<tr>
-    <td><b style="color:var(--accent);font-size:12px;font-family:monospace">${a.tagNo}</b></td>
-    <td>${a.vendor}</td><td>${a.department}</td>
-    <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.description}">${a.description}</td>
-    <td style="font-family:monospace;font-size:12px;color:var(--ink2)">${a.serialNo||'—'}</td>
+  tbody.innerHTML=rows.map(a=>`<tr style="${selectedIds.has(a.id)?'background:var(--accent-lt)':''}">
+    <td><input type="checkbox" ${selectedIds.has(a.id)?'checked':''} onchange="toggleSelect('${a.id}',this.checked)" style="cursor:pointer;width:15px;height:15px"></td>
+    <td><b style="color:var(--accent);font-size:12px;font-family:monospace">${a.tagNo||'—'}</b></td>
+    <td style="font-family:monospace;font-size:11px;color:var(--ink2)">${a.invoiceNo||'—'}</td>
+    <td style="font-size:11px;color:var(--ink2)">${a.invoiceDate||'—'}</td>
+    <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.vendor}</td>
+    <td>${a.department}</td>
+    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.description}">${a.description}</td>
+    <td style="font-family:monospace;font-size:11px;color:var(--ink2)">${a.serialNo||'—'}</td>
     <td style="text-align:center">${a.quantity}</td>
     <td style="text-align:right">${fmt(a.amount)}</td>
     <td style="text-align:right;font-weight:700">${fmt(a.total)}</td>
+    <td><span class="badge status-${a.status||'Active'}">${a.status||'Active'}</span></td>
     <td><span class="badge cond-${a.condition}">${a.condition}</span></td>
     <td style="white-space:nowrap">
       <button class="btn btn-ghost btn-sm btn-icon" onclick="editAsset('${a.id}')" title="Edit">✏️</button>
-      <button class="btn btn-danger btn-sm btn-icon" onclick="deleteAsset('${a.id}')" title="Delete">🗑</button>
+      ${canDelete ? `<button class="btn btn-danger btn-sm btn-icon" onclick="deleteAsset('${a.id}')" title="Delete">🗑</button>` : '<span title="No delete rights" style="display:inline-flex;width:34px;height:34px;align-items:center;justify-content:center;color:var(--ink3);font-size:16px">🔒</span>'}
     </td></tr>`).join('');
+  updateBulkBar();
 }
 
 function updateFilters() {
   const vendors=[...new Set(localAssets.map(a=>a.vendor))].sort();
   const depts=[...new Set(localAssets.map(a=>a.department))].sort();
-  const fv=document.getElementById('filterV'),fd=document.getElementById('filterD');
-  const cv=fv.value,cd=fd.value;
+  const buckets=[...new Set(localAssets.map(a=>a.bucket).filter(Boolean))].sort();
+  const fv=document.getElementById('filterV'),fd=document.getElementById('filterD'),fb=document.getElementById('filterB');
+  const cv=fv.value,cd=fd.value,cb=fb.value;
   fv.innerHTML='<option value="">All Vendors</option>'+vendors.map(v=>`<option ${v===cv?'selected':''}>${v}</option>`).join('');
   fd.innerHTML='<option value="">All Depts</option>'+depts.map(d=>`<option ${d===cd?'selected':''}>${d}</option>`).join('');
+  fb.innerHTML='<option value="">All Buckets</option>'+buckets.map(b=>`<option ${b===cb?'selected':''}>${b}</option>`).join('');
 }
 
-// ══ DASHBOARD ══
+// ── BUCKETS PAGE ──
+let activeBucket = 'All';
+function renderBuckets() {
+  const buckets = ['All', ...new Set(localAssets.map(a=>a.bucket||'Uncategorised'))].sort((a,b)=>a==='All'?-1:b==='All'?1:a.localeCompare(b));
+  document.getElementById('bucketTabs').innerHTML = buckets.map(b =>
+    `<div class="bucket-tab ${b===activeBucket?'active':''}" onclick="setBucket('${b}')">${b}</div>`).join('');
+  const filtered = activeBucket==='All' ? localAssets : localAssets.filter(a=>(a.bucket||'Uncategorised')===activeBucket);
+  const total = filtered.reduce((s,a)=>s+a.total,0);
+  document.getElementById('bucketContent').innerHTML = `
+    <div style="display:flex;gap:16px;margin-bottom:16px">
+      <div class="stat-card" style="flex:1"><div class="stat-label">Assets</div><div class="stat-value">${filtered.length}</div></div>
+      <div class="stat-card green" style="flex:1"><div class="stat-label">Total Value</div><div class="stat-value">${fmtShort(total)}</div></div>
+    </div>
+    <div class="table-wrap">
+      <table><thead><tr><th>Dept Tag No</th><th>Invoice No</th><th>Description</th><th>Vendor</th><th>Dept</th><th>Serial No</th><th>Qty</th><th>Unit ₹</th><th>Total ₹</th><th>Status</th><th>Condition</th></tr></thead>
+      <tbody>${filtered.map(a=>`<tr>
+        <td><b style="color:var(--accent);font-size:11px;font-family:monospace">${a.tagNo||'—'}</b></td>
+        <td style="font-family:monospace;font-size:11px;color:var(--ink2)">${a.invoiceNo||'—'}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.description}</td>
+        <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.vendor}</td>
+        <td>${a.department}</td>
+        <td style="font-family:monospace;font-size:11px">${a.serialNo||'—'}</td>
+        <td style="text-align:center">${a.quantity}</td>
+        <td style="text-align:right">${fmt(a.amount)}</td>
+        <td style="text-align:right;font-weight:700">${fmt(a.total)}</td>
+        <td><span class="badge status-${a.status||'Active'}">${a.status||'Active'}</span></td>
+        <td><span class="badge cond-${a.condition}">${a.condition}</span></td>
+      </tr>`).join('')||'<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">No assets in this bucket</div></div></td></tr>'}
+      </tbody></table>
+    </div>`;
+}
+window.setBucket = function(b) { activeBucket=b; renderBuckets(); };
+
+// ── DASHBOARD ──
 function renderDashboard() {
-  const assets=localAssets;
-  const total=assets.reduce((s,a)=>s+a.total,0);
-  const qty=assets.reduce((s,a)=>s+a.quantity,0);
-  const depts=new Set(assets.map(a=>a.department)).size;
-  document.getElementById('dashTotalAssets').textContent=assets.length;
+  const a=localAssets;
+  const total=a.reduce((s,x)=>s+x.total,0);
+  const qty=a.reduce((s,x)=>s+x.quantity,0);
+  const active=a.filter(x=>(x.status||'Active')==='Active').length;
+  document.getElementById('dashTotalAssets').textContent=a.length;
   document.getElementById('dashTotalQty').textContent=qty;
   document.getElementById('dashTotalVal').textContent=fmtShort(total);
-  document.getElementById('dashDepts').textContent=depts;
-  document.getElementById('dashSub').textContent=`${currentCompany.name} · ${assets.length} assets · Live from cloud`;
-  const byCond={};
-  assets.forEach(a=>byCond[a.condition]=(byCond[a.condition]||0)+1);
+  document.getElementById('dashActive').textContent=active;
+  document.getElementById('dashSub').textContent=`${currentCompany.name} · ${a.length} assets · Live`;
+  const grpHtml=(field,colorMap={})=>Object.entries(a.reduce((m,x)=>{m[x[field]]=(m[x[field]]||0)+1;return m},{})).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="summary-row"><span>${k||'—'}</span><span class="summary-val" style="color:${colorMap[k]||'var(--accent)'}">${v}</span></div>`).join('')||'<div style="color:var(--ink3);font-size:13px">No data</div>';
+  const statusColors={Active:'#2d6a4f',Sold:'#1565c0',Scrapped:'#bf360c',Discarded:'#6a1b9a'};
   const condColors={Good:'#2D6A4F',Fair:'#f57f17',Poor:'#e65100',Damaged:'#c0392b',Missing:'#6a1b9a'};
-  const condEl=document.getElementById('dashCondition');
-  condEl.innerHTML=Object.keys(byCond).length
-    ?Object.entries(byCond).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="summary-row"><span>${k}</span><span class="summary-val" style="color:${condColors[k]||'var(--accent)'}">${v} assets</span></div>`).join('')
-    :'<div style="color:var(--ink3);font-size:13px">No data yet</div>';
-  const byDept={};
-  assets.forEach(a=>byDept[a.department]=(byDept[a.department]||0)+a.total);
-  document.getElementById('dashDeptSummary').innerHTML=Object.keys(byDept).length
-    ?Object.entries(byDept).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>`<div class="summary-row"><span>${k}</span><span class="summary-val">${fmt(v)}</span></div>`).join('')
-    :'<div style="color:var(--ink3);font-size:13px">No data yet</div>';
+  document.getElementById('dashStatus').innerHTML=grpHtml('status',statusColors);
+  document.getElementById('dashCondition').innerHTML=grpHtml('condition',condColors);
+  const byDept=Object.entries(a.reduce((m,x)=>{m[x.department]=(m[x.department]||0)+x.total;return m},{})).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  document.getElementById('dashDeptSummary').innerHTML=byDept.map(([k,v])=>`<div class="summary-row"><span>${k}</span><span class="summary-val">${fmt(v)}</span></div>`).join('')||'<div style="color:var(--ink3);font-size:13px">No data</div>';
+  const byBucket=Object.entries(a.reduce((m,x)=>{const b=x.bucket||'Uncategorised';m[b]=(m[b]||0)+x.total;return m},{})).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  document.getElementById('dashBuckets').innerHTML=byBucket.map(([k,v])=>`<div class="summary-row"><span>${k}</span><span class="summary-val">${fmt(v)}</span></div>`).join('')||'<div style="color:var(--ink3);font-size:13px">No data</div>';
 }
 
-function updateSidebarCount() {
-  document.getElementById('sidebarCount').textContent=localAssets.length;
-}
+function updateSidebarCount() { document.getElementById('sidebarCount').textContent=localAssets.length; }
 
-// ══ SUMMARY ══
+// ── SUMMARY ──
 function renderSummary() {
-  const assets=localAssets;
-  document.getElementById('sumTotal').textContent=fmt(assets.reduce((s,a)=>s+a.total,0));
-  document.getElementById('sumItems').textContent=assets.length;
-  document.getElementById('sumQty').textContent=assets.reduce((s,a)=>s+a.quantity,0);
-  const grp=(key,fn=a=>a.total)=>{const m={};assets.forEach(a=>m[a[key]]=(m[a[key]]||0)+fn(a));return Object.entries(m).sort((a,b)=>b[1]-a[1]);};
-  const rows=(e,isCount=false)=>e.length?e.map(([k,v])=>`<div class="summary-row"><span>${k||'—'}</span><span class="summary-val">${isCount?v+' assets':fmt(v)}</span></div>`).join(''):'<div style="color:var(--ink3);font-size:13px">No data</div>';
+  const a=localAssets;
+  document.getElementById('sumTotal').textContent=fmt(a.reduce((s,x)=>s+x.total,0));
+  document.getElementById('sumItems').textContent=a.length;
+  document.getElementById('sumQty').textContent=a.reduce((s,x)=>s+x.quantity,0);
+  const grp=(key,fn=x=>x.total)=>{const m={};a.forEach(x=>m[x[key]]=(m[x[key]]||0)+fn(x));return Object.entries(m).sort((a,b)=>b[1]-a[1]);};
+  const rows=(e,isCnt)=>e.length?e.map(([k,v])=>`<div class="summary-row"><span>${k||'—'}</span><span class="summary-val">${isCnt?v+' assets':fmt(v)}</span></div>`).join(''):'<div style="color:var(--ink3);font-size:13px">No data</div>';
   document.getElementById('byVendor').innerHTML=rows(grp('vendor'));
   document.getElementById('byDept').innerHTML=rows(grp('department'));
+  document.getElementById('byStatus').innerHTML=rows(grp('status',()=>1),true);
+  document.getElementById('byBucket').innerHTML=rows(grp('bucket'));
   document.getElementById('byCond').innerHTML=rows(grp('condition',()=>1),true);
   document.getElementById('byCat').innerHTML=rows(grp('category'));
 }
 
-// ══ TEAM ══
+// ── DEPRECIATION ──
+window.switchDepAct = function(act) {
+  currentDepAct = act;
+  document.getElementById('depActBtn').className = act==='companies' ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
+  document.getElementById('depItBtn').className  = act==='it'        ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm';
+  renderDepreciation();
+};
+
+function renderDepreciation() {
+  const tbody = document.getElementById('depTableBody');
+  const currentYear = new Date().getFullYear();
+  const fyStart = new Date(new Date().getMonth() >= 3 ? currentYear : currentYear-1, 3, 1); // April 1
+
+  const rows = localAssets.filter(a => (a.status||'Active')==='Active').map(a => {
+    const bucket = a.bucket || a.category || 'default';
+    const cost = a.total || 0;
+    const putToUse = a.putToUseDate ? new Date(a.putToUseDate) : (a.invoiceDate ? new Date(a.invoiceDate) : null);
+
+    let rate, depAmount, wdv;
+    if (currentDepAct === 'companies') {
+      const rateObj = DEP_RATES_COMPANIES[bucket] || DEP_RATES_COMPANIES['default'];
+      rate = rateObj.rate;
+      if (putToUse) {
+        const daysInFY = Math.max(0, Math.min(365, (new Date(fyStart.getFullYear()+1, 2, 31) - Math.max(putToUse, fyStart)) / 86400000));
+        depAmount = round2(cost * (rate/100) * (daysInFY/365));
+      } else {
+        depAmount = round2(cost * (rate/100));
+      }
+      wdv = round2(cost - depAmount);
+    } else {
+      rate = DEP_RATES_IT[bucket] || DEP_RATES_IT['default'];
+      if (putToUse && putToUse > fyStart) {
+        depAmount = round2(cost * (rate/100) * 0.5); // half rate if added during year
+      } else {
+        depAmount = round2(cost * (rate/100));
+      }
+      wdv = round2(cost - depAmount);
+    }
+    return { a, rate, depAmount, wdv, putToUse };
+  });
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📉</div><div class="empty-title">No active assets</div></div></td></tr>`;
+    return;
+  }
+
+  const totalDep = rows.reduce((s,r)=>s+r.depAmount,0);
+  const totalWdv = rows.reduce((s,r)=>s+r.wdv,0);
+
+  tbody.innerHTML = rows.map(({a,rate,depAmount,wdv,putToUse})=>`<tr>
+    <td><b style="font-family:monospace;font-size:11px;color:var(--accent)">${a.tagNo||'—'}</b></td>
+    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.description}</td>
+    <td style="font-size:12px">${a.bucket||a.category||'—'}</td>
+    <td style="font-size:12px">${putToUse?putToUse.toLocaleDateString('en-IN'):'—'}</td>
+    <td style="text-align:right">${fmt(a.total)}</td>
+    <td class="dep-rate-cell" style="text-align:center">${rate}%</td>
+    <td style="text-align:right;color:var(--danger);font-weight:600">${fmt(depAmount)}</td>
+    <td style="text-align:right;font-weight:700;color:var(--success)">${fmt(wdv)}</td>
+  </tr>`).join('') + `<tr style="background:var(--surface2);font-weight:700">
+    <td colspan="6" style="text-align:right;font-size:13px">TOTAL</td>
+    <td style="text-align:right;color:var(--danger)">${fmt(totalDep)}</td>
+    <td style="text-align:right;color:var(--success)">${fmt(totalWdv)}</td>
+  </tr>`;
+}
+
+// ── TEAM ──
 async function renderTeam() {
   const el=document.getElementById('teamList');
-  el.innerHTML='<div style="color:var(--ink3);font-size:13px">Loading members…</div>';
+  el.innerHTML='<div style="color:var(--ink3);font-size:13px">Loading…</div>';
   try {
     const snap=await getDoc(doc(db,'companies',currentCompany.id));
-    const memberIds=snap.exists()?(snap.data().members||[]):[];
-    const memberDocs=await Promise.all(memberIds.map(uid=>getDoc(doc(db,'users',uid))));
-    const members=memberDocs.filter(d=>d.exists()).map(d=>({uid:d.id,...d.data()}));
-    el.innerHTML=members.map(u=>`<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)"><div class="avatar" style="width:38px;height:38px;font-size:15px">${u.name.charAt(0)}</div><div><div style="font-weight:600;font-size:14px">${u.name}</div><div style="font-size:12px;color:var(--ink2)">${u.email}</div></div>${u.uid===currentUser.uid?'<span class="badge" style="margin-left:auto;background:var(--accent-lt);color:var(--accent)">You</span>':''}</div>`).join('')||'<div style="color:var(--ink3);font-size:13px">No members found</div>';
-  } catch(e){ el.innerHTML='<div style="color:var(--ink3);font-size:13px">Could not load members</div>'; }
+    const ids=snap.exists()?(snap.data().members||[]):[];
+    const docs=await Promise.all(ids.map(uid=>getDoc(doc(db,'users',uid))));
+    const members=docs.filter(d=>d.exists()).map(d=>({uid:d.id,...d.data()}));
+    el.innerHTML=members.map(u=>`<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)">
+      <div class="avatar" style="width:38px;height:38px;font-size:15px">${u.name.charAt(0)}</div>
+      <div><div style="font-weight:600;font-size:14px">${u.name}</div><div style="font-size:12px;color:var(--ink2)">${u.email}</div></div>
+      ${u.uid===currentUser.uid?'<span class="badge" style="margin-left:auto;background:var(--accent-lt);color:var(--accent)">You</span>':''}
+    </div>`).join('')||'<div style="color:var(--ink3);font-size:13px">No members</div>';
+  } catch(e){ el.innerHTML='<div style="color:var(--ink3);font-size:13px">Could not load</div>'; }
 }
 
 window.copyCode = function() { navigator.clipboard.writeText(currentCompany.code).then(()=>toast('Code copied!','success')); };
 
-// ══ JOIN COMPANY ══
+// ── JOIN COMPANY ──
 window.joinCompany = async function() {
   const code=document.getElementById('joinCode').value.trim().toUpperCase();
   if(!code){showError('joinError','Enter a company code.');return;}
@@ -976,15 +1233,19 @@ window.joinCompany = async function() {
     closeModal('joinModal');
     toast('Joined '+company.name+'!','success');
     renderCompanyCards();
-  }catch(e){showError('joinError','Failed to join: '+e.message);}
+  }catch(e){showError('joinError','Failed: '+e.message);}
 };
 
-// ══ EXPORT ══
+// ── EXPORT ──
 window.exportCSV = function() {
   const rows=getFiltered();
   if(!rows.length){toast('No records to export','error');return;}
-  const h=['Tag No','Vendor','Department','Category','Description','Serial No','Quantity','Unit Amount','Total Amount','Condition','Location','Verification Date','Remarks'];
-  const csv=[h.join(','),...rows.map(a=>[a.tagNo,a.vendor,a.department,a.category||'',`"${a.description}"`,a.serialNo||'',a.quantity,a.amount,a.total,a.condition,a.location||'',a.verDate||'',`"${a.remarks||''}"`].join(','))].join('\n');
+  const h=['Dept Tag No','Invoice No','Vendor','Department','Bucket','Category','Description','Serial No','Quantity','Unit Amount','Total Amount','Status','Condition','Location','Invoice Date','Put to Use Date','Verification Date','Remarks'];
+  const csv=[h.join(','),...rows.map(a=>[
+    a.tagNo||'',a.invoiceNo||'',a.vendor,a.department,a.bucket||'',a.category||'',
+    `"${a.description}"`,a.serialNo||'',a.quantity,a.amount,a.total,
+    a.status||'Active',a.condition,a.location||'',a.invoiceDate||'',a.putToUseDate||'',
+    a.verDate||'',`"${a.remarks||''}"`].join(','))].join('\n');
   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
   const l=document.createElement('a');l.href=url;
   l.download=`${currentCompany.name.replace(/\s+/g,'_')}_assets_${new Date().toISOString().split('T')[0]}.csv`;
@@ -992,22 +1253,140 @@ window.exportCSV = function() {
   toast('CSV exported!','success');
 };
 
-// ══ NAVIGATION ══
+// ── CSV IMPORT ──
+window.handleCSVFile = function(event) {
+  const file = event.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const lines = text.split('\n').filter(l=>l.trim());
+    if(lines.length<2){toast('CSV file is empty','error');return;}
+    const headers = lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+    importData = [];
+    let skipped = 0;
+    for(let i=1;i<lines.length;i++){
+      const cols=[]; let cur='',inQ=false;
+      for(const ch of lines[i]){
+        if(ch==='"') inQ=!inQ;
+        else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}
+        else cur+=ch;
+      }
+      cols.push(cur.trim());
+      if(cols.every(c=>!c)) continue;
+      const row={};
+      headers.forEach((h,idx)=>row[h]=(cols[idx]||'').replace(/^"|"$/g,'').trim());
+      if(!row['Vendor']||!row['Description']){skipped++;continue;}
+      const validConds=['Good','Fair','Poor','Damaged','Missing'];
+      if(!validConds.includes(row['Condition'])) row['Condition']='Good';
+      row['Quantity']=parseInt(row['Quantity'])||1;
+      row['Unit Amount']=parseFloat(row['Unit Amount'])||0;
+      row['Total Amount']=row['Quantity']*row['Unit Amount'];
+      importData.push(row);
+    }
+    if(skipped) toast(skipped+' rows skipped (missing vendor/description)','warning');
+
+    // Duplicate check
+    const existingTags=new Set(localAssets.map(a=>a.tagNo?.toLowerCase()).filter(Boolean));
+    const dups=importData.filter(r=>r['Tag No']&&existingTags.has(r['Tag No'].toLowerCase()));
+    const dupWarn=document.getElementById('dupWarning');
+    if(dups.length){
+      dupWarn.style.display='block';
+      dupWarn.textContent=`⚠️ ${dups.length} rows have Tag Nos that already exist in Firebase. They will be imported as duplicates unless you cancel.`;
+    } else { dupWarn.style.display='none'; }
+
+    document.getElementById('importFileName').textContent='📄 '+file.name;
+    document.getElementById('importStats').textContent=importData.length+' assets ready · Total: '+fmt(importData.reduce((s,r)=>s+r['Total Amount'],0));
+    document.getElementById('importPreview').style.display='block';
+    document.getElementById('importSuccess').style.display='none';
+    const tbody=document.getElementById('importTableBody');
+    tbody.innerHTML=importData.slice(0,50).map(r=>`<tr>
+      <td><b style="color:var(--accent);font-family:monospace;font-size:11px">${r['Tag No']||'—'}</b></td>
+      <td style="font-family:monospace;font-size:11px">${r['Invoice No']||'—'}</td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r['Vendor']}</td>
+      <td>${r['Department']||'—'}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r['Description']}</td>
+      <td style="text-align:center">${r['Quantity']}</td>
+      <td style="text-align:right">${fmt(r['Unit Amount'])}</td>
+      <td style="text-align:right;font-weight:700">${fmt(r['Total Amount'])}</td>
+      <td><span class="badge status-Active">Active</span></td>
+    </tr>`).join('');
+    if(importData.length>50) tbody.innerHTML+=`<tr><td colspan="9" style="text-align:center;color:var(--ink3);font-style:italic">... and ${importData.length-50} more rows</td></tr>`;
+  };
+  reader.readAsText(file);
+};
+
+window.clearImport = function() {
+  importData=[];
+  document.getElementById('csvFileInput').value='';
+  document.getElementById('importPreview').style.display='none';
+  document.getElementById('importProgress').style.display='none';
+  document.getElementById('importSuccess').style.display='none';
+};
+
+window.runImport = async function() {
+  if(!importData.length){toast('No data to import','error');return;}
+  const btn=document.getElementById('importBtn'); btn.disabled=true;
+  document.getElementById('importProgress').style.display='block';
+  document.getElementById('importSuccess').style.display='none';
+  let done=0; const total=importData.length; const BATCH=10;
+  try {
+    for(let i=0;i<importData.length;i+=BATCH){
+      const batch=importData.slice(i,i+BATCH);
+      await Promise.all(batch.map(r=>addDoc(collection(db,'assets'),{
+        companyId:    currentCompany.id,
+        tagNo:        r['Tag No']||'',
+        invoiceNo:    r['Invoice No']||'',
+        vendor:       r['Vendor']||'',
+        department:   r['Department']||'',
+        bucket:       r['Bucket']||r['Category']||'',
+        category:     r['Category']||'',
+        description:  r['Description']||'',
+        serialNo:     r['Serial No']||'',
+        quantity:     r['Quantity']||1,
+        amount:       r['Unit Amount']||0,
+        total:        r['Total Amount']||0,
+        status:       'Active',
+        condition:    r['Condition']||'Good',
+        location:     r['Location']||'',
+        invoiceDate:  r['Invoice Date']||r['Verification Date']||'',
+        putToUseDate: r['Put to Use Date']||'',
+        verDate:      r['Verification Date']||'',
+        remarks:      r['Remarks']||'',
+        updatedBy:    currentUser.name,
+        updatedAt:    new Date().toISOString(),
+        importedAt:   new Date().toISOString()
+      })));
+      done+=batch.length;
+      const pct=Math.round((done/total)*100);
+      document.getElementById('importProgressBar').style.width=pct+'%';
+      document.getElementById('importProgressText').textContent='Importing… '+pct+'%';
+      document.getElementById('importProgressCount').textContent=done+' of '+total+' uploaded';
+    }
+    document.getElementById('importProgress').style.display='none';
+    document.getElementById('importSuccess').style.display='block';
+    document.getElementById('importSuccessText').textContent=total+' assets imported into '+currentCompany.name+'!';
+    toast(total+' assets imported!','success');
+    importData=[]; document.getElementById('csvFileInput').value='';
+    document.getElementById('importPreview').style.display='none';
+  } catch(e){ toast('Import failed: '+e.message,'error'); }
+  btn.disabled=false;
+};
+
+// ── NAVIGATION ──
 window.showPage = function(name) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.sidebar-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   document.querySelectorAll('.sidebar-item').forEach(b=>{
-    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(name)) b.classList.add('active');
+    if(b.getAttribute('onclick')?.includes(name)) b.classList.add('active');
   });
   if(name==='records'){updateFilters();renderTable();}
   if(name==='summary') renderSummary();
   if(name==='team') renderTeam();
-  if(name==='addAsset'){
-    document.getElementById('addAssetTitle').textContent=editingId?'Edit Asset':'Add Asset';
-    document.getElementById('formCardTitle').textContent=editingId?'Edit Asset Details':'New Asset Entry';
-    updateDataLists();
-  }
+  if(name==='depreciation') renderDepreciation();
+  if(name==='buckets') renderBuckets();
+  if(name==='admin') renderAdmin();
+  if(name==='addAsset'){ updateDataLists(); }
 };
 
 function updateDataLists(){
@@ -1017,149 +1396,106 @@ function updateDataLists(){
   document.getElementById('deptList').innerHTML=depts.map(d=>`<option value="${d}">`).join('');
 }
 
+// ── SELECTED ASSETS ──
+let selectedIds = new Set();
 
-// ══ CSV IMPORT ══
-let importData = [];
-
-window.handleCSVFile = function(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const text = e.target.result;
-    const lines = text.split('\n').filter(l => l.trim());
-    if (lines.length < 2) { toast('CSV file is empty or invalid', 'error'); return; }
-
-    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-    importData = [];
-    const errors = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      // Handle commas inside quoted fields
-      const cols = [];
-      let cur = '', inQ = false;
-      for (const ch of lines[i]) {
-        if (ch === '"') inQ = !inQ;
-        else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-        else cur += ch;
-      }
-      cols.push(cur.trim());
-
-      if (cols.every(c => !c)) continue;
-
-      const row = {};
-      headers.forEach((h, idx) => row[h] = (cols[idx] || '').replace(/^"|"$/g, '').trim());
-
-      // Validate required fields
-      if (!row['Tag No']) row['Tag No'] = 'IMP-' + (i);
-      if (!row['Vendor']) { errors.push('Row ' + (i+1) + ': Missing Vendor'); continue; }
-      if (!row['Description']) { errors.push('Row ' + (i+1) + ': Missing Description'); continue; }
-
-      // Validate condition
-      const validConds = ['Good','Fair','Poor','Damaged','Missing'];
-      if (!validConds.includes(row['Condition'])) row['Condition'] = 'Good';
-
-      row['Quantity'] = parseInt(row['Quantity']) || 1;
-      row['Unit Amount'] = parseFloat(row['Unit Amount']) || 0;
-      row['Total Amount'] = row['Quantity'] * row['Unit Amount'];
-
-      importData.push(row);
-    }
-
-    if (errors.length) toast(errors.length + ' rows skipped: ' + errors[0], 'warning');
-
-    // Show preview
-    document.getElementById('importFileName').textContent = '📄 ' + file.name;
-    document.getElementById('importStats').textContent =
-      importData.length + ' assets ready · Total value: ' +
-      fmt(importData.reduce((s,r) => s + r['Total Amount'], 0));
-    document.getElementById('importPreview').style.display = 'block';
-    document.getElementById('importSuccess').style.display = 'none';
-
-    // Render preview table
-    const tbody = document.getElementById('importTableBody');
-    tbody.innerHTML = importData.slice(0, 50).map(r => `<tr>
-      <td><b style="color:var(--accent);font-family:monospace;font-size:11px">${r['Tag No']}</b></td>
-      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r['Vendor']}</td>
-      <td>${r['Department']||'—'}</td>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r['Description']}</td>
-      <td style="text-align:center">${r['Quantity']}</td>
-      <td style="text-align:right">${fmt(r['Unit Amount'])}</td>
-      <td style="text-align:right;font-weight:700">${fmt(r['Total Amount'])}</td>
-      <td><span class="badge cond-${r['Condition']}">${r['Condition']}</span></td>
-    </tr>`).join('');
-    if (importData.length > 50) {
-      tbody.innerHTML += `<tr><td colspan="8" style="text-align:center;color:var(--ink3);font-style:italic;padding:12px">... and ${importData.length - 50} more rows (all will be imported)</td></tr>`;
-    }
-  };
-  reader.readAsText(file);
+window.toggleSelect = function(id, checked) {
+  if (checked) selectedIds.add(id); else selectedIds.delete(id);
+  updateBulkBar();
 };
 
-window.clearImport = function() {
-  importData = [];
-  document.getElementById('csvFileInput').value = '';
-  document.getElementById('importPreview').style.display = 'none';
-  document.getElementById('importProgress').style.display = 'none';
-  document.getElementById('importSuccess').style.display = 'none';
+window.toggleSelectAll = function(checked) {
+  const rows = getFiltered();
+  if (checked) rows.forEach(a => selectedIds.add(a.id));
+  else selectedIds.clear();
+  updateBulkBar();
+  renderTable();
 };
 
-window.runImport = async function() {
-  if (!importData.length) { toast('No data to import', 'error'); return; }
-  const btn = document.getElementById('importBtn');
-  btn.disabled = true;
-  document.getElementById('importProgress').style.display = 'block';
-  document.getElementById('importSuccess').style.display = 'none';
-
-  let done = 0;
-  const total = importData.length;
-  const BATCH = 10; // import in batches
-
-  try {
-    for (let i = 0; i < importData.length; i += BATCH) {
-      const batch = importData.slice(i, i + BATCH);
-      await Promise.all(batch.map(r => addDoc(collection(db, 'assets'), {
-        companyId:   currentCompany.id,
-        tagNo:       r['Tag No'] || '',
-        vendor:      r['Vendor'] || '',
-        department:  r['Department'] || '',
-        category:    r['Category'] || '',
-        description: r['Description'] || '',
-        serialNo:    r['Serial No'] || '',
-        quantity:    r['Quantity'] || 1,
-        amount:      r['Unit Amount'] || 0,
-        total:       r['Total Amount'] || 0,
-        condition:   r['Condition'] || 'Good',
-        location:    r['Location'] || '',
-        verDate:     r['Verification Date'] || '',
-        remarks:     r['Remarks'] || '',
-        updatedBy:   currentUser.name,
-        updatedAt:   new Date().toISOString(),
-        importedAt:  new Date().toISOString()
-      })));
-      done += batch.length;
-      const pct = Math.round((done/total)*100);
-      document.getElementById('importProgressBar').style.width = pct + '%';
-      document.getElementById('importProgressText').textContent = 'Importing... ' + pct + '%';
-      document.getElementById('importProgressCount').textContent = done + ' of ' + total + ' assets uploaded to Firebase';
-    }
-
-    document.getElementById('importProgress').style.display = 'none';
-    document.getElementById('importSuccess').style.display = 'block';
-    document.getElementById('importSuccessText').textContent = total + ' assets imported successfully into ' + currentCompany.name + '!';
-    toast(total + ' assets imported!', 'success');
-    importData = [];
-    document.getElementById('csvFileInput').value = '';
-    document.getElementById('importPreview').style.display = 'none';
-  } catch(e) {
-    toast('Import failed: ' + e.message, 'error');
-    document.getElementById('importProgressText').textContent = 'Import failed: ' + e.message;
+function updateBulkBar() {
+  const btn = document.getElementById('bulkDeleteBtn');
+  const cnt = document.getElementById('bulkCount');
+  if (!btn) return;
+  if (selectedIds.size > 0) {
+    btn.style.display = 'inline-flex';
+    cnt.textContent = selectedIds.size;
+  } else {
+    btn.style.display = 'none';
   }
-  btn.disabled = false;
+  const hdrChk = document.getElementById('headerChk');
+  const selAll = document.getElementById('selectAllChk');
+  const filtered = getFiltered();
+  const allSelected = filtered.length > 0 && filtered.every(a => selectedIds.has(a.id));
+  if (hdrChk) hdrChk.checked = allSelected;
+  if (selAll) selAll.checked = allSelected;
+}
+
+window.bulkDelete = async function() {
+  const canDelete = currentUser.email === ADMIN_EMAIL || currentUser.canDelete === true;
+  if (!canDelete) { toast('You do not have delete rights. Contact admin.', 'error'); return; }
+  if (!selectedIds.size) return;
+  if (!confirm(`Delete ${selectedIds.size} selected assets? This cannot be undone.`)) return;
+  setSyncDot('syncing');
+  try {
+    await Promise.all([...selectedIds].map(id => deleteDoc(doc(db, 'assets', id))));
+    toast(`${selectedIds.size} assets deleted`, 'warning');
+    selectedIds.clear();
+    updateBulkBar();
+  } catch(e) { toast('Bulk delete failed: ' + e.message, 'error'); setSyncDot('error'); }
 };
 
-// ══ HELPERS ══
-function fmt(n){return'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:0})}
-function fmtShort(n){if(n>=1e7)return'₹'+(n/1e7).toFixed(1)+'Cr';if(n>=1e5)return'₹'+(n/1e5).toFixed(1)+'L';if(n>=1e3)return'₹'+(n/1e3).toFixed(0)+'K';return'₹'+n}
+// ── ADMIN ──
+async function renderAdmin() {
+  const el = document.getElementById('adminUserList');
+  el.innerHTML = '<div style="color:var(--ink3);font-size:13px">Loading users...</div>';
+  try {
+    // Gather all user IDs from all companies
+    const allUids = new Set();
+    for (const c of COMPANIES) {
+      const snap = await getDoc(doc(db, 'companies', c.id));
+      if (snap.exists()) (snap.data().members || []).forEach(uid => allUids.add(uid));
+    }
+    const userDocs = await Promise.all([...allUids].map(uid => getDoc(doc(db, 'users', uid))));
+    const users = userDocs.filter(d => d.exists()).map(d => ({ uid: d.id, ...d.data() }));
+
+    document.getElementById('adminTotalUsers').textContent = users.length;
+
+    el.innerHTML = users.map(u => `
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)">
+        <div class="avatar" style="width:38px;height:38px;font-size:15px">${u.name.charAt(0)}</div>
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:14px">${u.name} ${u.email===ADMIN_EMAIL?'<span class="badge" style="background:var(--accent);color:#fff;margin-left:6px">Admin</span>':''}</div>
+          <div style="font-size:12px;color:var(--ink2)">${u.email}</div>
+          <div style="font-size:11px;color:var(--ink3);margin-top:2px">Companies: ${(u.companies||[]).join(', ')}</div>
+        </div>
+        ${u.email !== ADMIN_EMAIL ? `
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <div style="font-size:12px;font-weight:600;color:var(--ink2)">Delete Rights</div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <div onclick="toggleDeleteRight('${u.uid}', ${!u.canDelete})" style="width:44px;height:24px;border-radius:12px;background:${u.canDelete?'var(--success)':'var(--border)'};position:relative;cursor:pointer;transition:background .2s">
+              <div style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:2px;${u.canDelete?'right:2px':'left:2px'};transition:all .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)"></div>
+            </div>
+            <span style="font-size:12px;font-weight:600;color:${u.canDelete?'var(--success)':'var(--ink3)'}">${u.canDelete?'Granted':'Denied'}</span>
+          </label>
+        </div>` : ''}
+      </div>`).join('') || '<div style="color:var(--ink3);font-size:13px">No users found</div>';
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--danger);font-size:13px">Error loading users: ' + e.message + '</div>';
+  }
+}
+
+window.toggleDeleteRight = async function(uid, grant) {
+  try {
+    await updateDoc(doc(db, 'users', uid), { canDelete: grant });
+    toast(grant ? 'Delete rights granted' : 'Delete rights revoked', grant ? 'success' : 'warning');
+    renderAdmin();
+  } catch(e) { toast('Failed to update rights: ' + e.message, 'error'); }
+};
+
+// ── HELPERS ──
+function round2(n){return Math.round(n*100)/100;}
+function fmt(n){return'₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function fmtShort(n){if(n>=1e7)return'₹'+(n/1e7).toFixed(1)+'Cr';if(n>=1e5)return'₹'+(n/1e5).toFixed(1)+'L';if(n>=1e3)return'₹'+(n/1e3).toFixed(0)+'K';return'₹'+n;}
 window.toast=function(msg,type=''){
   const c=document.getElementById('toastContainer');
   const el=document.createElement('div');
@@ -1167,13 +1503,13 @@ window.toast=function(msg,type=''){
   el.textContent=(type==='success'?'✓ ':type==='error'?'✕ ':type==='warning'?'⚠ ':'')+msg;
   c.appendChild(el);
   setTimeout(()=>el.classList.add('show'),50);
-  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},3000);
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400);},3500);
 };
 window.openModal=id=>document.getElementById(id).classList.add('show');
 window.closeModal=id=>document.getElementById(id).classList.remove('show');
-window.showError=(id,msg)=>{const el=document.getElementById(id);el.textContent=msg;el.classList.add('show')};
+window.showError=(id,msg)=>{const el=document.getElementById(id);el.textContent=msg;el.classList.add('show');};
 window.hideError=id=>document.getElementById(id).classList.remove('show');
-document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')}));
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');}));
 </script>
 </body>
 </html>
